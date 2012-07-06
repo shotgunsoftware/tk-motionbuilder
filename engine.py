@@ -1,7 +1,9 @@
-"""
-Copyright (c) 2012 Shotgun Software, Inc
-----------------------------------------------------
+#
+# Copyright (c) 2012 Shotgun Software, Inc
+# ----------------------------------------------------
+#
 
+"""
 A MotionBuilder engine for Tank.
 
 """
@@ -22,7 +24,7 @@ CONSOLE_OUTPUT_WIDTH = 120
 class MotionBuilderEngine(tank.platform.Engine):
     def init_engine(self):
         self.log_debug("%s: Initializing..." % self)
-        
+
         # now check that there is a location on disk which corresponds to the context
         # for the MotionBuilder engine (because it for example sets the MotionBuilder project)
         if len(self.context.entity_locations) == 0:
@@ -45,6 +47,6 @@ class MotionBuilderEngine(tank.platform.Engine):
 
     def log_error(self, msg):
         QtGui.QMessageBox.critical(None, "Tank Error", str(msg))
-        
+
     def log_warning(self, msg):
         sys.stdout.write(str(msg)+'\n')
