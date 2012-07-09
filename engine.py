@@ -8,9 +8,6 @@ A MotionBuilder engine for Tank.
 
 """
 
-# std libs
-import sys
-
 # tank libs
 import tank
 
@@ -40,13 +37,13 @@ class MotionBuilderEngine(tank.platform.Engine):
         self.log_debug('%s: Destroying...' % self)
 
     def log_debug(self, msg):
-        sys.stdout.write(str(msg)+'\n')
+        print msg
 
     def log_info(self, msg):
-        sys.stdout.write(str(msg)+'\n')
+        print msg
 
     def log_error(self, msg):
         QtGui.QMessageBox.critical(None, "Tank Error", str(msg))
 
     def log_warning(self, msg):
-        sys.stdout.write(str(msg)+'\n')
+        print msg
