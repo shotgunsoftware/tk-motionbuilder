@@ -12,7 +12,7 @@ A MotionBuilder engine for Tank.
 import tank
 
 # application libs
-from PyQt4 import QtGui
+from pyfbsdk import FBMessageBox
 from pyfbsdk import FBMenuManager
 
 
@@ -43,7 +43,7 @@ class MotionBuilderEngine(tank.platform.Engine):
         print msg
 
     def log_error(self, msg):
-        QtGui.QMessageBox.critical(None, "Tank Error", str(msg))
+        FBMessageBox( "Tank Error",  str(msg), "OK" )
 
     def log_warning(self, msg):
         print msg
