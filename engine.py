@@ -13,7 +13,6 @@ import tank
 
 # application libs
 from pyfbsdk import FBMessageBox
-from pyfbsdk import FBMenuManager
 
 
 CONSOLE_OUTPUT_WIDTH = 120
@@ -28,10 +27,9 @@ class MotionBuilderEngine(tank.platform.Engine):
             raise tank.TankError("No folders on disk are associated with the current context. The MotionBuilder "
                 "engine requires a context which exists on disk in order to run correctly.")
 
-        menu_mgr = FBMenuManager()
-        menu = menu_mgr.GetMenu("Tank")
-        if not menu:
-            menu_mgr.InsertBefore(None, "Help", "Tank")
+        import tk_motionbuilder
+        self._menu_generator = tk_motionbuilder.MenuGenerator(self)
+        self._menu_generator.create_menu()
 
     def destroy_engine(self):
         self.log_debug('%s: Destroying...' % self)
