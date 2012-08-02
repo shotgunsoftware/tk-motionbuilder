@@ -56,7 +56,6 @@ class MenuGenerator(object):
                 cmd = AppCommand(cmd_name, cmd_details)
                 if cmd.get_app_instance_name() == app_instance_name and cmd.name == menu_name:
                     # found our match!
-                    print "Match"
                     self.__menu_index += 1
                     cmd.add_command_to_menu(self._menu_handle, self.__menu_index)
 
@@ -66,13 +65,15 @@ class MenuGenerator(object):
         # separate them out into various sections
         commands_by_app = {}
 
+        context_menu_index = 103
         for (cmd_name, cmd_details) in self._engine.commands.items():
-            print cmd_name
             cmd = AppCommand(cmd_name, cmd_details)
 
             if cmd.get_type() == "context_menu":
                 # context menu!
-                cmd.add_command_to_menu(self._context_menu)
+                context_menu_index += 1
+                cmd.add_command_to_menu(self._context_menu, context_menu_index)
+                self._add_event_callback(cmd.name, cmd.callback)
             else:
                 # normal menu
                 app_name = cmd.get_app_name()
@@ -84,7 +85,6 @@ class MenuGenerator(object):
                 commands_by_app[app_name].append(cmd)
 
         # now add all apps to main menu
-        print commands_by_app
         self._add_app_menu(commands_by_app)
 
     def destroy_menu(self):
@@ -119,7 +119,6 @@ class MenuGenerator(object):
             # e.g. [Lighting, Shot ABC_123]
             ctx_name = "%s, %s %s" % (task_step, ctx.entity["type"], ctx.entity["name"])
 
-        print ctx_name
         # create the menu object
         ctx_menu = FBGenericMenu()
         ctx_menu.InsertLast("About Tank", self.__menu_index * 100 + 1)
@@ -138,6 +137,10 @@ class MenuGenerator(object):
         return ctx_menu
 
     def _add_event_callback(self, event_name, callback):
+        """
+        Creates a mapping between the menu item name and the callback that should be
+        run when it is clicked.
+        """
         self._callbacks[event_name] = callback
 
     def _jump_to_sg(self):
@@ -246,7 +249,9 @@ class MenuGenerator(object):
     # private methods
 
     def __menu_event(self, control, event):
-        print control, event.Id, event.Name
+        """
+        Handles menu events.
+        """
         callback = self._callbacks.get(event.Name)
         if callback:
             callback()
