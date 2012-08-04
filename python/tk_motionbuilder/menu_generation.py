@@ -88,7 +88,13 @@ class MenuGenerator(object):
         self._add_app_menu(commands_by_app)
 
     def destroy_menu(self):
-        pass
+        item = self._menu_handle.GetFirstItem()
+        while item:
+            next_item = self._menu_handle.GetNextItem(item)
+            self._menu_handle.DeleteItem(item)
+            item = next_item
+        self.__menu_index = 1
+        self._callbacks = {}
 
     ##########################################################################################
     # context menu and UI
@@ -243,7 +249,7 @@ class MenuGenerator(object):
                 cmd_obj = commands_by_app[app_name][0]
                 self.__menu_index += 1
                 cmd_obj.add_command_to_menu(self._menu_handle, self.__menu_index)
-                self._add_event_callback(cmd.name, cmd.callback)
+                self._add_event_callback(cmd_obj.name, cmd_obj.callback)
 
     ##########################################################################################
     # private methods

@@ -33,6 +33,7 @@ class MotionBuilderEngine(tank.platform.Engine):
 
     def destroy_engine(self):
         self.log_debug('%s: Destroying...' % self)
+        self._menu_generator.destroy_menu()
 
     def log_debug(self, msg):
         print msg
