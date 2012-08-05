@@ -77,7 +77,7 @@ def __engine_refresh(tk, new_context):
     Checks the the tank engine should be
     """
 
-    engine_name = os.environ.get("TANK_NUKE_ENGINE_INIT_NAME")
+    engine_name = os.environ.get("TANK_MOTIONBUILDER_ENGINE_INIT_NAME")
 
     curr_engine = tank.platform.current_engine()
     if curr_engine:
