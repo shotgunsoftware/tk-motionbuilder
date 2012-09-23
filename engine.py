@@ -8,6 +8,9 @@ A MotionBuilder engine for Tank.
 
 """
 
+import os
+import sys
+
 # tank libs
 import tank
 
@@ -75,10 +78,14 @@ class MotionBuilderEngine(tank.platform.Engine):
         
         # now try to import it
         try:
-            from PySide import QtGui
+            from PySide import QtCore
         except Exception, e:
             self.log_error("PySide could not be imported! Tank Apps using pyside will not "
                            "operate correctly! Error reported: %s" % e)
+        else:
+            self.log_debug("Adding support for various image formats via qplugins...")
+            plugin_path = os.path.join(self.disk_location, "resources","pyside112_py26_qt470_win64", "qt_plugins")
+            QtCore.QCoreApplication.addLibraryPath(plugin_path)
 
 
     def post_app_init(self):

@@ -72,10 +72,11 @@ Last step is to test in mobu. This is simple.
 - Add the pythonpath to sys.path
 - Add the lib directory to PATH
 - Run some QT code:
->>> from PySide import QtGui
->>> wid = QtGui.QWidget()
->>> wid.resize(250, 150)
->>> wid.setWindowTitle('Simple')
->>> wid.show()
+from PySide import QtGui
+wid = QtGui.QWidget()
+wid.resize(250, 150)
+wid.setWindowTitle('Simple')
+wid.show()
+
 
 
