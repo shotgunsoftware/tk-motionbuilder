@@ -7,7 +7,7 @@ import platform
 import webbrowser
 import unicodedata
 
-from PyQt4 import QtGui
+from PySide import QtGui
 from .ui.dialog import Ui_Dialog
 
 class ContextDetailsDialog(QtGui.QDialog):

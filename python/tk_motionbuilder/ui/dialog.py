@@ -2,12 +2,12 @@
 
 # Form implementation generated from reading ui file 'dialog.ui'
 #
-# Created: Sun Jul 15 15:53:43 2012
+# Created: Sun Sep 23 11:56:21 2012
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
+from PySide import QtCore, QtGui
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
