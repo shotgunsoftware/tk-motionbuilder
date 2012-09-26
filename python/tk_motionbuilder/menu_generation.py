@@ -58,6 +58,9 @@ class MenuGenerator(object):
                     # found our match!
                     self.__menu_index += 1
                     cmd.add_command_to_menu(self._menu_handle, self.__menu_index)
+                    # mark as a favourite item
+                    cmd.favourite = True            
+                    
 
         #self._menu_handle.addSeparator()
 
@@ -223,9 +226,10 @@ class MenuGenerator(object):
                 # todo: Should this be labelled with the name of the app
                 # or the name of the menu item? Not sure.
                 cmd_obj = commands_by_app[app_name][0]
-                self.__menu_index += 1
-                cmd_obj.add_command_to_menu(self._menu_handle, self.__menu_index)
-                self._add_event_callback(cmd_obj.name, cmd_obj.callback)
+                if not cmd_obj.favourite:
+                    self.__menu_index += 1
+                    cmd_obj.add_command_to_menu(self._menu_handle, self.__menu_index)
+                    self._add_event_callback(cmd_obj.name, cmd_obj.callback)
 
     ##########################################################################################
     # private methods
@@ -247,6 +251,7 @@ class AppCommand(object):
         self.name = name
         self.properties = command_dict["properties"]
         self.callback = command_dict["callback"]
+        self.favourite = False
 
     def get_app_name(self):
         """
