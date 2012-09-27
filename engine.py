@@ -18,6 +18,36 @@ import tank
 from pyfbsdk import FBMessageBox
 
 
+
+# custom exception handler for motion builder
+def tank_mobu_exception_trap(ex_cls, ex, tb):
+    # careful about infinite loops here - 
+    # MUST NOT RAISE EXCEPTIONS :)
+    
+    # assemble message
+    error_message = "Could not format error message"
+    try:
+        import traceback
+        tb_str = "\n".join(traceback.format_tb(tb))
+        error_message = "A Python Exception was Caught!\n\nDetails: %s\nError Type: %s\n\nTraceback:\n%s" % (ex, ex_cls, tb_str)
+    except:
+        pass
+
+    # now output it    
+    try:
+        from PySide import QtGui
+        QtGui.QMessageBox.critical(None, "Python Exception Raised", error_message)
+    except:
+        try:
+            print str(error_message)
+        except:
+            pass
+        
+
+
+
+
+
 class MotionBuilderEngine(tank.platform.Engine):
     
     def init_engine(self):
@@ -46,7 +76,8 @@ class MotionBuilderEngine(tank.platform.Engine):
         # import pyside QT UI libraries
         self._init_pyside()
 
-
+        # motionbuilder doesn't have good exception handling, so install our own trap
+        sys.excepthook = tank_mobu_exception_trap
 
 
     def _init_pyside(self):
@@ -109,3 +140,6 @@ class MotionBuilderEngine(tank.platform.Engine):
 
     def log_warning(self, msg):
         print msg
+
+
+

@@ -22,8 +22,6 @@ class MenuGenerator(object):
     def __init__(self, engine):
         self._engine = engine
         self._dialogs = []
-        engine_root_dir = self._engine.disk_location
-        self.tank_logo = os.path.abspath(os.path.join(engine_root_dir, "resources", "logo_gray_22.png"))
         self.__menu_index = 1
         self._callbacks = {}
 
