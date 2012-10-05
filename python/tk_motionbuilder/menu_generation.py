@@ -217,6 +217,7 @@ class MenuGenerator(object):
                     cmd.add_command_to_menu(app_menu, menu_id + j + 1)
                     self._add_event_callback(cmd.name, cmd.callback)
                 app_menu.OnMenuActivate.Add(self.__menu_event)
+                app_name = self.__strip_unicode(app_name)
                 self._menu_handle.InsertLast(app_name, menu_id, app_menu)
             else:
                 # this app only has a single entry.
@@ -239,6 +240,15 @@ class MenuGenerator(object):
         callback = self._callbacks.get(event.Name)
         if callback:
             callback()
+            
+    def __strip_unicode(self, val):
+        """
+        Get rid of unicode
+        """
+        if val.__class__ == unicode:
+            val = unicodedata.normalize('NFKD', val).encode('ascii', 'ignore')
+        return val   
+            
 
 class AppCommand(object):
     """
@@ -246,10 +256,16 @@ class AppCommand(object):
     """
 
     def __init__(self, name, command_dict):
-        self.name = name
+
         self.properties = command_dict["properties"]
         self.callback = command_dict["callback"]
         self.favourite = False
+        
+        # deal with mobu's inability to handle unicode. #fail
+        if name.__class__ == unicode:
+            self.name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
+        else:
+            self.name = name
 
     def get_app_name(self):
         """
