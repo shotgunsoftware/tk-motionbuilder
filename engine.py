@@ -120,7 +120,8 @@ class MotionBuilderEngine(tank.platform.Engine):
 
 
     def post_app_init(self):
-        import tk_motionbuilder
+
+        tk_motionbuilder = self.import_module("tk_motionbuilder")        
         self._menu_generator = tk_motionbuilder.MenuGenerator(self)
         self._menu_generator.create_menu()
 
