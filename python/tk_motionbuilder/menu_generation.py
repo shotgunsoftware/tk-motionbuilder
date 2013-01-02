@@ -7,7 +7,6 @@ Menu handling for Nuke
 """
 import os
 import sys
-import platform
 import webbrowser
 import unicodedata
 
@@ -180,15 +179,15 @@ class MenuGenerator(object):
         # todo: can we do this in a more elegant way?
         for disk_location in paths:
 
-            # get the setting
-            system = platform.system()
-
+            # get the setting        
+            system = sys.platform
+            
             # run the app
-            if system == "Linux":
+            if system == "linux2":
                 cmd = 'xdg-open "%s"' % disk_location
-            elif system == "Darwin":
+            elif system == "darwin":
                 cmd = 'open "%s"' % disk_location
-            elif system == "Windows":
+            elif system == "win32":
                 cmd = 'cmd.exe /C start "Folder" "%s"' % disk_location
             else:
                 raise Exception("Platform '%s' is not supported." % system)
