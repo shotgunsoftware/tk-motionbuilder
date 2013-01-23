@@ -52,7 +52,7 @@ class MotionBuilderEngine(tank.platform.Engine):
     
     def init_engine(self):
         self.log_debug("%s: Initializing..." % self)
-
+        
         # now check that there is a location on disk which 
         if self.context.entity:
             # context has an entity
@@ -73,6 +73,9 @@ class MotionBuilderEngine(tank.platform.Engine):
                             "engine requires a context which exists on disk in order to run "
                             "correctly.")
 
+        # keep track of UI
+        self.__created_qt_dialogs = []
+        
         # import pyside QT UI libraries
         self._init_pyside()
 
@@ -117,6 +120,98 @@ class MotionBuilderEngine(tank.platform.Engine):
             self.log_debug("Adding support for various image formats via qplugins...")
             plugin_path = os.path.join(self.disk_location, "resources","pyside112_py26_qt470_win64", "qt_plugins")
             QtCore.QCoreApplication.addLibraryPath(plugin_path)
+            
+    def _get_qt_main_window(self):
+        """
+        returns a handle to the QMainWindow of motionbuilder. None if not found.
+        """
+        import shiboken
+        import win32gui
+        from PySide import QtGui
+        
+        # EnumWindows requires a callback function
+        def callback(handle, winList):
+          winList.append(handle)
+          return True
+        
+        # Get list of open windows
+        windows = []
+        win32gui.EnumWindows(callback, windows)
+        
+        # Find window belonging to motionbuilder
+        for handle in windows:
+          title = win32gui.GetWindowText(handle)
+          if ("MotionBuilder" in title):
+            return shiboken.wrapInstance(long(handle), QtGui.QMainWindow)            
+        # MB window not found
+        return None
+
+    def show_dialog(self, title, bundle, widget_class, *args, **kwargs):
+        """
+        Shows a non-modal dialog window in a way suitable for this engine. 
+        The engine will attempt to parent the dialog nicely to the host application.
+        
+        :param title: The title of the window
+        :param bundle: The app, engine or framework object that is associated with this window
+        :param widget_class: The class of the UI to be constructed. This must derive from QWidget.
+        
+        Additional parameters specified will be passed through to the widget_class constructor.
+        
+        :returns: the created widget_class instance
+        """
+        from tank.platform.qt import tankqdialog 
+        from PySide import QtCore, QtGui
+        
+        # first construct the widget object 
+        obj = widget_class(*args, **kwargs)
+        
+        # now create a dialog to put it inside
+        # parent it to the active window by default
+        parent = self._get_qt_main_window()
+        dialog = tankqdialog.TankQDialog(title, bundle, obj, parent)
+        
+        # keep a reference to all created dialogs to make GC happy
+        self.__created_qt_dialogs.append(dialog)
+        
+        # finally show it        
+        dialog.show()
+        
+        # lastly, return the instantiated class
+        return obj
+    
+    def show_modal(self, title, bundle, widget_class, *args, **kwargs):
+        """
+        Shows a modal dialog window in a way suitable for this engine. The engine will attempt to
+        integrate it as seamlessly as possible into the host application. This call is blocking 
+        until the user closes the dialog.
+        
+        :param title: The title of the window
+        :param bundle: The app, engine or framework object that is associated with this window
+        :param widget_class: The class of the UI to be constructed. This must derive from QWidget.
+        
+        Additional parameters specified will be passed through to the widget_class constructor.
+
+        :returns: (a standard QT dialog status return code, the created widget_class instance)
+        """
+        from tank.platform.qt import tankqdialog 
+        from PySide import QtCore, QtGui
+        
+        # first construct the widget object 
+        obj = widget_class(*args, **kwargs)
+        
+        # now create a dialog to put it inside
+        # parent it to the active window by default
+        parent = self._get_qt_main_window()
+        dialog = tankqdialog.TankQDialog(title, bundle, obj, parent)
+        
+        # keep a reference to all created dialogs to make GC happy
+        self.__created_qt_dialogs.append(dialog)
+        
+        # finally launch it, modal state        
+        status = dialog.exec_()
+        
+        # lastly, return the instantiated class
+        return (status, obj)
 
 
     def post_app_init(self):
