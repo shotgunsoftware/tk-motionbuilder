@@ -123,27 +123,22 @@ class MotionBuilderEngine(tank.platform.Engine):
             
     def _get_qt_main_window(self):
         """
-        returns a handle to the QMainWindow of motionbuilder. None if not found.
+        Find the main Motionbuilder window/QWidget
+        
+        :returns: QWidget if found or None if not
         """
-        import shiboken
-        import win32gui
         from PySide import QtGui
         
-        # EnumWindows requires a callback function
-        def callback(handle, winList):
-          winList.append(handle)
-          return True
+        # get all top level windows:
+        top_level_windows = QtGui.QApplication.topLevelWidgets()
         
-        # Get list of open windows
-        windows = []
-        win32gui.EnumWindows(callback, windows)
+        # from this list, find the main application window.
+        for w in top_level_windows:
+            if (type(w) == QtGui.QWidget        # window is always QWidget 
+                and len(w.windowTitle()) > 0    # window always has a title/caption
+                and w.parentWidget() == None):  # parent widget is always None
+                return w
         
-        # Find window belonging to motionbuilder
-        for handle in windows:
-          title = win32gui.GetWindowText(handle)
-          if ("MotionBuilder" in title):
-            return shiboken.wrapInstance(long(handle), QtGui.QMainWindow)            
-        # MB window not found
         return None
 
     def show_dialog(self, title, bundle, widget_class, *args, **kwargs):
