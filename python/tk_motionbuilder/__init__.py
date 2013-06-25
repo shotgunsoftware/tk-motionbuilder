@@ -2,7 +2,7 @@
 Copyright (c) 2012 Shotgun Software, Inc
 ----------------------------------------------------
 
-Callbacks to manage the engine when a new file is loaded in tank.
+Callbacks to manage the engine when a new file is loaded in shotgun.
 
 """
 import os
@@ -22,25 +22,25 @@ from .menu_generation import MenuGenerator
 
 def __show_tank_disabled_message(details):
     """
-    Message when user clicks the tank is disabled menu
+    Message when user clicks the shotgun is disabled menu
     """
-    msg = ("Tank is currently disabled because the file you "
-           "have opened is not recognized by Tank. Tank cannot "
+    msg = ("Shotgun integration is currently disabled because the file you "
+           "have opened is not recognized - Shotgun cannot "
            "determine which Context the currently open file belongs to. "
-           "In order to enable the Tank functionality, try opening another "
+           "In order to enable the Shotgun functionality, try opening another "
            "file. <br><br><i>Details:</i> %s" % details)
-    FBMessageBox( "Tank Error",  msg, "OK" )
+    FBMessageBox( "Shotgun Error",  msg, "OK" )
 
 def __create_tank_disabled_menu(details):
     """
-    Creates a std "disabled" tank menu
+    Creates a std "disabled" Shotgun menu
     """
     menu_mgr = FBMenuManager()
-    menu = menu_mgr.GetMenu("Tank")
+    menu = menu_mgr.GetMenu("Shotgun")
     if not menu:
-        menu_mgr.InsertBefore(None, "Help", "Tank")
-        menu = menu_mgr.GetMenu("Tank")
-    menu.InsertLast("Tank is disabled.", 1)
+        menu_mgr.InsertBefore(None, "Help", "Shotgun")
+        menu = menu_mgr.GetMenu("Shotgun")
+    menu.InsertLast("Sgtk is disabled.", 1)
 
     def menu_event(control, event):
         __show_tank_disabled_message(details)
@@ -49,32 +49,32 @@ def __create_tank_disabled_menu(details):
 
 def __create_tank_error_menu():
     """
-    Creates a std "error" tank menu and grabs the current context.
+    Creates a std "error" shotgun menu and grabs the current context.
     Make sure that this is called from inside an except clause.
     """
     (exc_type, exc_value, exc_traceback) = sys.exc_info()
     message = ""
-    message += "Message: There was a problem starting the Tank Engine.\n"
+    message += "Message: There was a problem starting the Engine.\n"
     message += "Please contact sgtksupport@shotgunsoftware.com\n\n"
     message += "Exception: %s - %s\n" % (exc_type, exc_value)
     message += "Traceback (most recent call last):\n"
     message += "\n".join( traceback.format_tb(exc_traceback))
 
     menu_mgr = FBMenuManager()
-    menu = menu_mgr.GetMenu("Tank")
+    menu = menu_mgr.GetMenu("Shotgun")
     if not menu:
-        menu_mgr.InsertBefore(None, "Help", "Tank")
-        menu = menu_mgr.GetMenu("Tank")
-    menu.InsertLast("[Tank Error - Click for details]", 1)
+        menu_mgr.InsertBefore(None, "Help", "Shotgun")
+        menu = menu_mgr.GetMenu("Shotgun")
+    menu.InsertLast("[Shotgun Error - Click for details]", 1)
 
     def menu_event(control, event):
-        FBMessageBox( "Tank Error",  message, "OK" )
+        FBMessageBox( "Shotgun Error",  message, "OK" )
     menu.OnMenuActivate.Add(menu_event)
 
 
 def __engine_refresh(tk, new_context):
     """
-    Checks the the tank engine should be
+    Checks the the Shotgun engine should be
     """
 
     engine_name = os.environ.get("TANK_MOTIONBUILDER_ENGINE_INIT_NAME")

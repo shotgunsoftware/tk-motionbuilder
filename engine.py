@@ -4,7 +4,7 @@
 #
 
 """
-A MotionBuilder engine for Tank.
+A MotionBuilder engine for Shotgun.
 
 """
 
@@ -55,7 +55,7 @@ class MotionBuilderEngine(tank.platform.Engine):
         
         if self.context.project is None:
             # must have at least a project in the context to even start!
-            raise tank.TankError("The Tank engine needs at least a project in the context "
+            raise tank.TankError("The Motionbuilder engine needs at least a project in the context "
                                  "in order to start! Your context: %s" % self.context)
 
         # keep track of UI
@@ -78,10 +78,10 @@ class MotionBuilderEngine(tank.platform.Engine):
             from PySide import QtGui
         except:
             # fine, we don't expect pyside to be present just yet
-            self.log_debug("PySide not detected - Tank will add it to the setup now...")
+            self.log_debug("PySide not detected - it will be added to the setup now...")
         else:
             # looks like pyside is already working! No need to do anything
-            self.log_debug("PySide detected - Tank will use the existing version.")
+            self.log_debug("PySide detected - the existing version will be used.")
             return
         
         if sys.platform == "win32":
@@ -99,7 +99,7 @@ class MotionBuilderEngine(tank.platform.Engine):
         try:
             from PySide import QtCore
         except Exception, e:
-            self.log_error("PySide could not be imported! Tank Apps using pyside will not "
+            self.log_error("PySide could not be imported! Apps using pyside will not "
                            "operate correctly! Error reported: %s" % e)
         else:
             self.log_debug("Adding support for various image formats via qplugins...")
@@ -195,9 +195,14 @@ class MotionBuilderEngine(tank.platform.Engine):
 
 
     def post_app_init(self):
-
-        tk_motionbuilder = self.import_module("tk_motionbuilder")        
-        self._menu_generator = tk_motionbuilder.MenuGenerator(self)
+        # default menu name is Shotgun but this can be overriden
+        # in the configuration to be Sgtk in case of conflicts
+        menu_name = "Shotgun"
+        if self.get_setting("use_sgtk_as_menu_name", False):
+            menu_name = "Sgtk"
+            
+        tk_motionbuilder = self.import_module("tk_motionbuilder")                
+        self._menu_generator = tk_motionbuilder.MenuGenerator(self, menu_name)
         self._menu_generator.create_menu()
 
     def destroy_engine(self):
@@ -209,12 +214,14 @@ class MotionBuilderEngine(tank.platform.Engine):
             print msg
 
     def log_info(self, msg):
+        msg = "Shotgun: %s" % msg
         print msg
 
     def log_error(self, msg):
-        FBMessageBox( "Tank Error",  str(msg), "OK" )
+        FBMessageBox( "Shotgun Error",  str(msg), "OK" )
 
     def log_warning(self, msg):
+        msg = "Shotgun Warning: %s" % msg
         print msg
 
 

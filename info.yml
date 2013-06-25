@@ -27,13 +27,17 @@ configuration:
                 name: { type: str }
                 app_instance: { type: str }
 
-
+    use_sgtk_as_menu_name:
+        type: bool
+        description: Optionally choose to use 'Sgtk' as the primary menu name instead of 'Shotgun'
+        default_value: false
+        
 # the Shotgun fields that this engine needs in order to operate correctly
 requires_shotgun_fields:
 
 # More verbose description of this item 
 display_name: "Motionbuilder Engine"
-description: "Tank Integration in Motionbuilder"
+description: "Shotgun Integration in Motionbuilder"
 
 # Required minimum versions for this item to run
 requires_shotgun_version:

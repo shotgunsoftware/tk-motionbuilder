@@ -18,8 +18,9 @@ class MenuGenerator(object):
     Menu generation functionality for Nuke
     """
 
-    def __init__(self, engine):
+    def __init__(self, engine, menu_name):
         self._engine = engine
+        self._menu_name = menu_name
         self._dialogs = []
         self.__menu_index = 1
         self._callbacks = {}
@@ -29,14 +30,14 @@ class MenuGenerator(object):
 
     def create_menu(self):
         """
-        Render the entire Tank menu.
+        Render the entire Shotgun menu.
         """
         # create main menu
         menu_mgr = FBMenuManager()
-        self._menu_handle = menu_mgr.GetMenu("Tank")
+        self._menu_handle = menu_mgr.GetMenu(self._menu_name)
         if not self._menu_handle:
-            menu_mgr.InsertBefore(None, "Help", "Tank")
-            self._menu_handle = menu_mgr.GetMenu("Tank")
+            menu_mgr.InsertBefore(None, "Help", self._menu_name)
+            self._menu_handle = menu_mgr.GetMenu(self._menu_name)
         #self._menu_handle.clearMenu()
         self._menu_handle.OnMenuActivate.Add(self.__menu_event)
         # now add the context item on top of the main menu
