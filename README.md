@@ -1,4 +1,4 @@
 tk-motionbuilder
 =======
 
-Tank: MotionBuilder Engine
+MotionBuilder Engine
