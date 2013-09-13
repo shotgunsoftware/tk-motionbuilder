@@ -63,9 +63,6 @@ class MotionBuilderEngine(tank.platform.Engine):
             raise tank.TankError("The Motionbuilder engine needs at least a project in the context "
                                  "in order to start! Your context: %s" % self.context)
 
-        # keep track of UI
-        self.__created_qt_dialogs = []
-        
         # import pyside QT UI libraries
         self._init_pyside()
 
@@ -111,9 +108,11 @@ class MotionBuilderEngine(tank.platform.Engine):
             plugin_path = os.path.join(self.disk_location, "resources","pyside112_py26_qt470_win64", "qt_plugins")
             QtCore.QCoreApplication.addLibraryPath(plugin_path)
             
-    def _get_qt_main_window(self):
+    def _get_dialog_parent(self):
         """
-        Find the main Motionbuilder window/QWidget
+        Find the main Motionbuilder window/QWidget.  This
+        will be used as the parent for all dialogs created
+        by show_modal or show_dialog
         
         :returns: QWidget if found or None if not
         """
@@ -130,74 +129,6 @@ class MotionBuilderEngine(tank.platform.Engine):
                 return w
         
         return None
-
-    def show_dialog(self, title, bundle, widget_class, *args, **kwargs):
-        """
-        Shows a non-modal dialog window in a way suitable for this engine. 
-        The engine will attempt to parent the dialog nicely to the host application.
-        
-        :param title: The title of the window
-        :param bundle: The app, engine or framework object that is associated with this window
-        :param widget_class: The class of the UI to be constructed. This must derive from QWidget.
-        
-        Additional parameters specified will be passed through to the widget_class constructor.
-        
-        :returns: the created widget_class instance
-        """
-        from tank.platform.qt import tankqdialog 
-        from PySide import QtCore, QtGui
-        
-        # first construct the widget object 
-        obj = widget_class(*args, **kwargs)
-        
-        # now create a dialog to put it inside
-        # parent it to the active window by default
-        parent = self._get_qt_main_window()
-        dialog = tankqdialog.TankQDialog(title, bundle, obj, parent)
-        
-        # keep a reference to all created dialogs to make GC happy
-        self.__created_qt_dialogs.append(dialog)
-        
-        # finally show it        
-        dialog.show()
-        
-        # lastly, return the instantiated class
-        return obj
-    
-    def show_modal(self, title, bundle, widget_class, *args, **kwargs):
-        """
-        Shows a modal dialog window in a way suitable for this engine. The engine will attempt to
-        integrate it as seamlessly as possible into the host application. This call is blocking 
-        until the user closes the dialog.
-        
-        :param title: The title of the window
-        :param bundle: The app, engine or framework object that is associated with this window
-        :param widget_class: The class of the UI to be constructed. This must derive from QWidget.
-        
-        Additional parameters specified will be passed through to the widget_class constructor.
-
-        :returns: (a standard QT dialog status return code, the created widget_class instance)
-        """
-        from tank.platform.qt import tankqdialog 
-        from PySide import QtCore, QtGui
-        
-        # first construct the widget object 
-        obj = widget_class(*args, **kwargs)
-        
-        # now create a dialog to put it inside
-        # parent it to the active window by default
-        parent = self._get_qt_main_window()
-        dialog = tankqdialog.TankQDialog(title, bundle, obj, parent)
-        
-        # keep a reference to all created dialogs to make GC happy
-        self.__created_qt_dialogs.append(dialog)
-        
-        # finally launch it, modal state        
-        status = dialog.exec_()
-        
-        # lastly, return the instantiated class
-        return (status, obj)
-
 
     def post_app_init(self):
         # default menu name is Shotgun but this can be overriden
