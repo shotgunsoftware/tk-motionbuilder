@@ -28,30 +28,31 @@ class MenuGenerator(object):
     def __init__(self, engine, menu_name):
         self._engine = engine
         self._menu_name = menu_name
-        self._dialogs = []
         self.__menu_index = 1
         self._callbacks = {}
 
     ##########################################################################################
     # public methods
-
+    
     def create_menu(self):
         """
         Render the entire Shotgun menu.
         """
         # create main menu
         menu_mgr = FBMenuManager()
-        self._menu_handle = menu_mgr.GetMenu(self._menu_name)
-        if not self._menu_handle:
-            menu_mgr.InsertBefore(None, "Help", self._menu_name)
-            self._menu_handle = menu_mgr.GetMenu(self._menu_name)
-        #self._menu_handle.clearMenu()
-        self._menu_handle.OnMenuActivate.Add(self.__menu_event)
+        sg_menu = menu_mgr.GetMenu(self._menu_name)
+        if not sg_menu:
+            menu_mgr.InsertBefore(None, "&Help", self._menu_name)
+            sg_menu = menu_mgr.GetMenu(self._menu_name)
+        sg_menu.OnMenuActivate.Add(self.__menu_event)
         # now add the context item on top of the main menu
-        self._context_menu = self._add_context_menu()
-        #self._menu_handle.addSeparator()
+        self._context_menu = self._add_context_menu(sg_menu)
+
+        # add separator:
+        sg_menu.InsertLast("", self.__next_menu_index())
 
         # now add favourites
+        have_favourites = False
         for fav in self._engine.get_setting("menu_favourites"):
             app_instance_name = fav["app_instance"]
             menu_name = fav["name"]
@@ -60,27 +61,26 @@ class MenuGenerator(object):
             for (cmd_name, cmd_details) in self._engine.commands.items():
                 cmd = AppCommand(cmd_name, cmd_details)
                 if cmd.get_app_instance_name() == app_instance_name and cmd.name == menu_name:
+                    have_favourites = True
                     # found our match!
-                    self.__menu_index += 1
-                    cmd.add_command_to_menu(self._menu_handle, self.__menu_index)
+                    cmd.add_command_to_menu(sg_menu, self.__next_menu_index())
                     # mark as a favourite item
                     cmd.favourite = True            
-                    
 
-        #self._menu_handle.addSeparator()
+        if have_favourites:
+            # add separator:
+            sg_menu.InsertLast("", self.__next_menu_index())
 
         # now go through all of the menu items.
         # separate them out into various sections
         commands_by_app = {}
 
-        context_menu_index = 103
         for (cmd_name, cmd_details) in self._engine.commands.items():
             cmd = AppCommand(cmd_name, cmd_details)
 
             if cmd.get_type() == "context_menu":
                 # context menu!
-                context_menu_index += 1
-                cmd.add_command_to_menu(self._context_menu, context_menu_index)
+                cmd.add_command_to_menu(self._context_menu, self.__next_menu_index())
                 self._add_event_callback(cmd.name, cmd.callback)
             else:
                 # normal menu
@@ -93,21 +93,25 @@ class MenuGenerator(object):
                 commands_by_app[app_name].append(cmd)
 
         # now add all apps to main menu
-        self._add_app_menu(commands_by_app)
+        self._add_app_menu(sg_menu, commands_by_app)
 
     def destroy_menu(self):
-        item = self._menu_handle.GetFirstItem()
-        while item:
-            next_item = self._menu_handle.GetNextItem(item)
-            self._menu_handle.DeleteItem(item)
-            item = next_item
-        self.__menu_index = 1
-        self._callbacks = {}
+        menu_mgr = FBMenuManager()
+        menu = menu_mgr.GetMenu(self._menu_name)
+        
+        if menu:
+            item = menu.GetFirstItem()
+            while item:
+                next_item = menu.GetNextItem(item)
+                menu.DeleteItem(item)
+                item = next_item
+            self.__menu_index = 1
+            self._callbacks = {}
 
     ##########################################################################################
     # context menu and UI
 
-    def _add_context_menu(self):
+    def _add_context_menu(self, menu):
         """
         Adds a context menu which displays the current context
         """
@@ -118,16 +122,15 @@ class MenuGenerator(object):
         # create the menu object
         ctx_menu = FBGenericMenu()
 
-        ctx_menu.InsertLast("Jump to Shotgun", self.__menu_index * 100 + 2)
+        ctx_menu.InsertLast("Jump to Shotgun", self.__next_menu_index())
         self._add_event_callback("Jump to Shotgun", self._jump_to_sg)
 
-        ctx_menu.InsertLast("Jump to File System", self.__menu_index * 100 + 3)
+        ctx_menu.InsertLast("Jump to File System", self.__next_menu_index())
         self._add_event_callback("Jump to File System", self._jump_to_fs)
 
         ctx_menu.OnMenuActivate.Add(self.__menu_event)
 
-        self._menu_handle.InsertFirst(ctx_name, self.__menu_index, ctx_menu)
-        self.__menu_index += 1
+        menu.InsertFirst(ctx_name, self.__next_menu_index(), ctx_menu)
         return ctx_menu
 
     def _add_event_callback(self, event_name, callback):
@@ -172,7 +175,7 @@ class MenuGenerator(object):
     ##########################################################################################
     # app menus
 
-    def _add_app_menu(self, commands_by_app):
+    def _add_app_menu(self, menu, commands_by_app):
         """
         Add all apps to the main menu, process them one by one.
         """
@@ -181,16 +184,13 @@ class MenuGenerator(object):
             if len(commands_by_app[app_name]) > 1:
                 # more than one menu entry fort his app
                 # make a sub menu and put all items in the sub menu
-                #app_menu = self._menu_handle.InsertLast(app_name, tank_index + i)
                 app_menu = FBGenericMenu()
-                self.__menu_index += 1
-                menu_id = self.__menu_index * 100
                 for j, cmd in enumerate(commands_by_app[app_name]):
-                    cmd.add_command_to_menu(app_menu, menu_id + j + 1)
+                    cmd.add_command_to_menu(app_menu, self.__next_menu_index())
                     self._add_event_callback(cmd.name, cmd.callback)
                 app_menu.OnMenuActivate.Add(self.__menu_event)
                 app_name = self.__strip_unicode(app_name)
-                self._menu_handle.InsertLast(app_name, menu_id, app_menu)
+                menu.InsertLast(app_name, self.__next_menu_index(), app_menu)
             else:
                 # this app only has a single entry.
                 # display that on the menu
@@ -198,12 +198,21 @@ class MenuGenerator(object):
                 # or the name of the menu item? Not sure.
                 cmd_obj = commands_by_app[app_name][0]
                 if not cmd_obj.favourite:
-                    self.__menu_index += 1
-                    cmd_obj.add_command_to_menu(self._menu_handle, self.__menu_index)
+                    cmd_obj.add_command_to_menu(menu, self.__next_menu_index())
                     self._add_event_callback(cmd_obj.name, cmd_obj.callback)
 
     ##########################################################################################
     # private methods
+
+    def __next_menu_index(self):
+        """
+        Get the next sequential menu index.  I think these need to be 
+        unique within the Shotgun menu but they aren't used directly 
+        by Toolkit anywhere
+        """
+        idx = self.__menu_index
+        self.__menu_index += 1
+        return idx
 
     def __menu_event(self, control, event):
         """
@@ -211,7 +220,12 @@ class MenuGenerator(object):
         """
         callback = self._callbacks.get(event.Name)
         if callback:
-            callback()
+            # execute callback through a Qt singleShot timer event
+            # to disconnect the command from the menu.  Otherwise
+            # any apps that restart the engine (causing the menu to
+            # be rebuilt) can cause Motionbuilder to crash!
+            from sgtk.platform.qt import QtCore
+            QtCore.QTimer.singleShot(100, callback)
             
     def __strip_unicode(self, val):
         """
