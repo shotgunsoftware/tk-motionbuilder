@@ -45,8 +45,18 @@ class MenuGenerator(object):
             menu_mgr.InsertBefore(None, "&Help", self._menu_name)
             sg_menu = menu_mgr.GetMenu(self._menu_name)
         sg_menu.OnMenuActivate.Add(self.__menu_event)
+        
+        # (AD) - currently, root-level menu items seem to cause Motionbuilder 2012 to crash
+        # (2013 works fine).  sub-menus work correctly as proven by the following code that
+        # forces everything into an additional sub-menu.
+        #
+        #sg_sub_menu = FBGenericMenu()
+        #sg_menu.InsertFirst("Shotgun...", self.__next_menu_index(), sg_sub_menu)
+        #sg_sub_menu.OnMenuActivate.Add(self.__menu_event)
+        #sg_menu = sg_sub_menu
+        
         # now add the context item on top of the main menu
-        self._context_menu = self._add_context_menu(sg_menu)
+        context_menu = self._add_context_menu(sg_menu)
 
         # add separator:
         sg_menu.InsertLast("", self.__next_menu_index())
@@ -80,7 +90,7 @@ class MenuGenerator(object):
 
             if cmd.get_type() == "context_menu":
                 # context menu!
-                cmd.add_command_to_menu(self._context_menu, self.__next_menu_index())
+                cmd.add_command_to_menu(context_menu, self.__next_menu_index())
                 self._add_event_callback(cmd.name, cmd.callback)
             else:
                 # normal menu
