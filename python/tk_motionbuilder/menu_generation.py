@@ -17,7 +17,8 @@ import sys
 import webbrowser
 import unicodedata
 
-from pyfbsdk import FBMenuManager
+from pyfbsdk import FBSystem
+from pyfbsdk import FBMenuManager 
 from pyfbsdk import FBGenericMenu
 
 class MenuGenerator(object):
@@ -30,6 +31,12 @@ class MenuGenerator(object):
         self._menu_name = menu_name
         self.__menu_index = 1
         self._callbacks = {}
+        
+        # Currently, root-level menu items seem to cause Motionbuilder 2011 & 2012 to 
+        # crash (2013+ works fine though).  sub-menus work correctly so for <=2012 we 
+        # force everything to be at least one level deep so at least it's stable!        
+        fb_sys = FBSystem()
+        self.__all_menus_nested = (fb_sys.Version < 13000.0)  
 
     ##########################################################################################
     # public methods
@@ -44,16 +51,10 @@ class MenuGenerator(object):
         if not sg_menu:
             menu_mgr.InsertBefore(None, "&Help", self._menu_name)
             sg_menu = menu_mgr.GetMenu(self._menu_name)
-        sg_menu.OnMenuActivate.Add(self.__menu_event)
-        
-        # (AD) - currently, root-level menu items seem to cause Motionbuilder 2012 to crash
-        # (2013 works fine).  sub-menus work correctly as proven by the following code that
-        # forces everything into an additional sub-menu.
-        #
-        #sg_sub_menu = FBGenericMenu()
-        #sg_menu.InsertFirst("Shotgun...", self.__next_menu_index(), sg_sub_menu)
-        #sg_sub_menu.OnMenuActivate.Add(self.__menu_event)
-        #sg_menu = sg_sub_menu
+            
+        if not self.__all_menus_nested:
+            # need to handle root-level menu items
+            sg_menu.OnMenuActivate.Add(self.__menu_event)
         
         # now add the context item on top of the main menu
         context_menu = self._add_context_menu(sg_menu)
@@ -62,7 +63,7 @@ class MenuGenerator(object):
         sg_menu.InsertLast("", self.__next_menu_index())
 
         # now add favourites
-        have_favourites = False
+        favourites_menu = None
         for fav in self._engine.get_setting("menu_favourites"):
             app_instance_name = fav["app_instance"]
             menu_name = fav["name"]
@@ -71,13 +72,24 @@ class MenuGenerator(object):
             for (cmd_name, cmd_details) in self._engine.commands.items():
                 cmd = AppCommand(cmd_name, cmd_details)
                 if cmd.get_app_instance_name() == app_instance_name and cmd.name == menu_name:
-                    have_favourites = True
-                    # found our match!
-                    cmd.add_command_to_menu(sg_menu, self.__next_menu_index())
+                    # found our match!                    
+                    if self.__all_menus_nested:
+                        # workaround for bug in 2012 which causes Motionbuilder to crash
+                        # when clicking on root-level menu items
+                        if not favourites_menu:
+                            favourites_menu = FBGenericMenu()
+                            favourites_menu.OnMenuActivate.Add(self.__menu_event)
+                            sg_menu.InsertLast("Favorites", self.__next_menu_index(), favourites_menu)                            
+                    else:
+                        favourites_menu = sg_menu
+                    
+                    # add to the favourites section of the menu:
+                    cmd.add_command_to_menu(favourites_menu, self.__next_menu_index())
+                    
                     # mark as a favourite item
                     cmd.favourite = True            
 
-        if have_favourites:
+        if favourites_menu:
             # add separator:
             sg_menu.InsertLast("", self.__next_menu_index())
 
@@ -191,8 +203,8 @@ class MenuGenerator(object):
         """
 
         for i, app_name in enumerate(sorted(commands_by_app.keys())):
-            if len(commands_by_app[app_name]) > 1:
-                # more than one menu entry fort his app
+            if self.__all_menus_nested or len(commands_by_app[app_name]) > 1:
+                # more than one menu entry for this app
                 # make a sub menu and put all items in the sub menu
                 app_menu = FBGenericMenu()
                 for j, cmd in enumerate(commands_by_app[app_name]):
