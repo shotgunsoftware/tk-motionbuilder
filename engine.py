@@ -21,6 +21,7 @@ import tank
 
 # application libs
 from pyfbsdk import FBMessageBox
+from pyfbsdk import FBSystem
 
 
 
@@ -85,11 +86,13 @@ class MotionBuilderEngine(tank.platform.Engine):
             # looks like pyside is already working! No need to do anything
             self.log_debug("PySide detected - the existing version will be used.")
             return
+
+        pyside_folder = self._get_pyside_folder();
         
         if sys.platform == "win32":
-            pyside_path = os.path.join(self.disk_location, "resources","pyside112_py26_qt470_win64", "python")
+            pyside_path = os.path.join(self.disk_location, "resources", pyside_folder, "python")
             sys.path.append(pyside_path)   
-            dll_path = os.path.join(self.disk_location, "resources","pyside112_py26_qt470_win64", "lib")
+            dll_path = os.path.join(self.disk_location, "resources", pyside_folder, "lib")
             path = os.environ.get("PATH", "")
             path += ";%s" % dll_path
             os.environ["PATH"] = path
@@ -105,7 +108,7 @@ class MotionBuilderEngine(tank.platform.Engine):
                            "operate correctly! Error reported: %s" % e)
         else:
             self.log_debug("Adding support for various image formats via qplugins...")
-            plugin_path = os.path.join(self.disk_location, "resources","pyside112_py26_qt470_win64", "qt_plugins")
+            plugin_path = os.path.join(self.disk_location, "resources", pyside_folder, "qt_plugins")
             QtCore.QCoreApplication.addLibraryPath(plugin_path)
             
     def _get_dialog_parent(self):
@@ -129,6 +132,20 @@ class MotionBuilderEngine(tank.platform.Engine):
                 return w
         
         return None
+
+    def _get_pyside_folder(self):
+        version = FBSystem().Version
+        folder = ''
+
+        # MotionBuilder 2012 and 2013 use a qt compiled with vs2008 (even though mobu 2013 itself is compiled with 2010).
+        # Use a dumpbin /headers on MoBu's qtcore4.dll to see which linker version was used, since versioning can
+        # easily get confusing.
+        if version < 14000:
+            folder = "pyside112_py26_qt470_win64_vs2008"
+        else:
+            folder = "pyside112_py26_qt470_win64_vs2010"
+
+        return folder
 
     def post_app_init(self):
         # default menu name is Shotgun but this can be overriden
