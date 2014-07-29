@@ -87,7 +87,7 @@ class MotionBuilderEngine(tank.platform.Engine):
             self.log_debug("PySide detected - the existing version will be used.")
             return
 
-        pyside_folder = self._get_pyside_folder();
+        pyside_folder = self.__get_pyside_folder();
         
         if sys.platform == "win32":
             pyside_path = os.path.join(self.disk_location, "resources", pyside_folder, "python")
@@ -133,7 +133,13 @@ class MotionBuilderEngine(tank.platform.Engine):
         
         return None
 
-    def _get_pyside_folder(self):
+    def __get_pyside_folder(self):
+        """
+        Get the correct pyside folder name according to the 
+        correct Motionbuilder version.
+
+        :returns: String of the correct pyside distribution folder name (not the entire path)
+        """
         version = FBSystem().Version
         folder = ''
 

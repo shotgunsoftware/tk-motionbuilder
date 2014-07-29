@@ -1,4 +1,4 @@
-Build instructions for Pyside, QT and Python - on Linux
+Build instructions for Pyside, QT and Python - on Windows
 ------------------------------------------------------------------
 
 This version of pyside was built with python 2.6 (64 bit) and QT 4.7.0 on windows 7 
@@ -6,6 +6,13 @@ to match Motionbuilder 2012/2013.
 
 The compiler was Visual studio express 2008 with the latest microsoft Platform SDK. 
 
+Note: Motionbuilder's Qt library is not always compiled with the same visual studio 
+      version as Motionbuilder itself. Therefore, you can't simply use Motionbuilder's
+      documented visual studio compiler version as a reference to build Qt. 
+
+      Instead, use dumpbin.exe /headers on QtCore4.dll in the Motionbuilder's bin/x64 
+      folder and look at the 'linker version' to know what version of visual studio to 
+      compile Qt with.
 
 PREPARATIONS
 =================
@@ -17,7 +24,7 @@ PREPARATIONS
 - install the .net framework v4
 - install the microsoft platform SDK
 --  note! If you are getting strange errors, you may need to uninstall the 
-    visual studio 2010 redistributable - see 
+    visual studio 2008 redistributable - see 
     http://stackoverflow.com/questions/1901279/windows-7-sdk-installation-failure
 - set up VC Express to use the SDK instead of the bundled libraries - see here:
   http://maliciousattacker.blogspot.co.uk/2008/10/creating-64-bit-applications-with.html
@@ -26,7 +33,8 @@ BUILDING QT
 ===========
 - download qt open source 4.7.0
 - start the Platform SDK shell - this configures the frameworks to be 64 bit
-- build it using configure.exe -release -opensource
+- configure it using: configure.exe -release -opensource
+- after configuration, build it using: nmake
 - make sure to add the final bin directory to your PATH so that the dlls are found.
 
 BUILDING PYSIDE
