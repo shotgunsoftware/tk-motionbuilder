@@ -49,4 +49,3 @@ description: "Shotgun Integration in Motionbuilder"
 requires_shotgun_version:
 requires_core_version: "v0.14.23"
 
-# XXX will require core version with metrics logging

@@ -164,7 +164,12 @@ class MotionBuilderEngine(tank.platform.Engine):
         self._menu_generator = tk_motionbuilder.MenuGenerator(self, menu_name)
         self._menu_generator.create_menu()
 
-        self.log_user_attribute_metric("Motionbuilder version", str(FBSystem().Version))
+        try:
+            self.log_user_attribute_metric("Motionbuilder version",
+                str(FBSystem().Version))
+        except:
+            # ignore all errors. ex: using a core that doesn't support metrics
+            pass
 
     def destroy_engine(self):
         self.log_debug('%s: Destroying...' % self)
