@@ -55,6 +55,28 @@ def tank_mobu_exception_trap(ex_cls, ex, tb):
 
 
 class MotionBuilderEngine(tank.platform.Engine):
+
+    @property
+    def host_info(self):
+        """
+        :returns: A {"name": application name, "version": application version}
+                  dictionary with informations about the application hosting this
+                  engine.
+
+        NOTE:
+        http://docs.autodesk.com/MB/2014/ENU/MotionBuilder-SDK-Documentation/index.html
+        """
+        host_info = {"name": "Motionbuilder", "version": "unknown"}
+
+        try:
+            # NOTE: The 'Version' returns a double value
+            # we really need the conversion to string.
+            host_info["version"] = str(FBSystem().Version)
+        except:
+            # Fallback to initialized values above
+            pass
+
+        return host_info
     
     def init_engine(self):
         self.log_debug("%s: Initializing..." % self)
@@ -163,13 +185,6 @@ class MotionBuilderEngine(tank.platform.Engine):
         tk_motionbuilder = self.import_module("tk_motionbuilder")                
         self._menu_generator = tk_motionbuilder.MenuGenerator(self, menu_name)
         self._menu_generator.create_menu()
-
-        try:
-            self.log_user_attribute_metric("Motionbuilder version",
-                str(FBSystem().Version))
-        except:
-            # ignore all errors. ex: using a core that doesn't support metrics
-            pass
 
     def destroy_engine(self):
         self.log_debug('%s: Destroying...' % self)
