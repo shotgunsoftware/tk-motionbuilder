@@ -59,12 +59,21 @@ class MotionBuilderEngine(tank.platform.Engine):
     @property
     def host_info(self):
         """
-        :returns: A {"name": application name, "version": application version}
-                  dictionary with informations about the application hosting this
-                  engine.
+        :returns: A dictionary with information about the application hosting this engine.
 
-        NOTE:
-        http://docs.autodesk.com/MB/2014/ENU/MotionBuilder-SDK-Documentation/index.html
+        The returned dictionary is of the following form on success:
+
+            {
+                "name": "Motionbuilder",
+                "version": "180000",
+            }
+
+        and of following form on an error preventing the version identification.
+
+            {
+                "name": "Motionbuilder",
+                "version: "unknown"
+            }
         """
         host_info = {"name": "Motionbuilder", "version": "unknown"}
 
