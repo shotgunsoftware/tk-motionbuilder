@@ -411,10 +411,21 @@ def _get_save_as_action():
 
     Simple helper for returning a log action dict for saving the session
     """
+    engine = sgtk.platform.current_engine()
+
+    # default save callback
+    callback = lambda: _save_session(_session_path())
+
+    # if workfiles2 is configured, use that for file save
+    if "tk-multi-workfiles2" in engine.apps:
+        app = engine.apps["tk-multi-workfiles2"]
+        if hasattr(app, "show_file_save_dlg"):
+            callback = app.show_file_save_dlg
+
     return {
         "action_button": {
             "label": "Save As...",
             "tooltip": "Save the current session",
-            "callback": lambda: _save_session(_session_path())
+            "callback": callback
         }
     }
