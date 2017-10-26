@@ -21,30 +21,17 @@ HookBaseClass = sgtk.get_hook_baseclass()
 
 class MotionBuilderSessionPublishPlugin(HookBaseClass):
     """
-    Plugin for publishing an open motion builder session.
+    Plugin for publishing an open Motion Builder session.
+
+    This hook relies on functionality found in the base file publisher hook in
+    the publish2 app and should inherit from it in the configuration. The hook
+    setting for this plugin should look something like this::
+
+        hook: "{self}/publish_file.py:{engine}/tk-multi-publish2/basic/publish_session.py"
+
     """
 
-    @property
-    def icon(self):
-        """
-        Path to an png icon on disk
-        """
-
-        # look for icon one level up from this hook's folder in "icons" folder
-        return os.path.join(
-            self.disk_location,
-            os.pardir,
-            "icons",
-            "publish.png"
-        )
-
-    @property
-    def name(self):
-        """
-        One line display name describing the plugin
-        """
-        return "Publish to Shotgun"
-
+    # NOTE: The plugin icon and name are defined by the base file plugin.
     @property
     def description(self):
         """
@@ -57,9 +44,11 @@ class MotionBuilderSessionPublishPlugin(HookBaseClass):
         return """
         Publishes the file to Shotgun. A <b>Publish</b> entry will be
         created in Shotgun which will include a reference to the file's current
-        path on disk. Other users will be able to access the published file via
-        the <b><a href='%s'>Loader</a></b> so long as they have access to
-        the file's location on disk.
+        path on disk. If a publish template is configured, a copy of the
+        current session will be copied to the publish template path which
+        will be the file that is published. Other users will be able to access
+        the published file via the <b><a href='%s'>Loader</a></b> so long as
+        they have access to the file's location on disk.
 
         If the session has not been saved, validation will fail and a button
         will be provided in the logging output to save the file.
@@ -78,24 +67,25 @@ class MotionBuilderSessionPublishPlugin(HookBaseClass):
         <li><code>filename-v###.ext</code></li>
         </ul>
 
-        After publishing, if a version number is detected in the file, the file
-        will automatically be saved to the next incremental version number.
-        For example, <code>filename.v001.ext</code> will be published and copied
-        to <code>filename.v002.ext</code>
+        After publishing, if a version number is detected in the work file, the
+        work file will automatically be saved to the next incremental version
+        number. For example, <code>filename.v001.ext</code> will be published
+        and copied to <code>filename.v002.ext</code>
 
         If the next incremental version of the file already exists on disk, the
         validation step will produce a warning, and a button will be provided in
         the logging output which will allow saving the session to the next
         available version number prior to publishing.
 
-        <br><br><i>NOTE: any amount of version number padding is supported.</i>
+        <br><br><i>NOTE: any amount of version number padding is supported. for
+        non-template based workflows.</i>
 
         <h3>Overwriting an existing publish</h3>
-        A file can be published multiple times however only the most recent
-        publish will be available to other users. Warnings will be provided
-        during validation if there are previous publishes.
+        In non-template workflows, a file can be published multiple times,
+        however only the most recent publish will be available to other users.
+        Warnings will be provided during validation if there are previous
+        publishes.
         """ % (loader_url,)
-        # TODO: add link to workflow docs
 
     @property
     def settings(self):
@@ -122,11 +112,6 @@ class MotionBuilderSessionPublishPlugin(HookBaseClass):
 
         # settings specific to this class
         mobu_publish_settings = {
-            "Publish Type": {
-                "type": "shotgun_publish_type",
-                "default": "Motion Builder FBX",
-                "description": "SG publish type to associate publishes with."
-            },
             "Publish Template": {
                 "type": "template",
                 "default": None,
@@ -189,21 +174,12 @@ class MotionBuilderSessionPublishPlugin(HookBaseClass):
                 extra=_get_save_as_action()
             )
 
-        accepted = True
-        publisher = self.parent
-        template_name = settings["Publish Template"].value
-
-        publish_template = publisher.get_template_by_name(template_name)
-        item.properties["publish_template"] = publish_template
-        if not publish_template and not item.parent.properties.get("work_template"):
-            accepted = False
-
         self.logger.info(
             "Motion Builder '%s' plugin accepted the current Motion Builder session." %
             (self.name,)
         )
         return {
-            "accepted": accepted,
+            "accepted": True,
             "checked": True
         }
 
@@ -231,40 +207,19 @@ class MotionBuilderSessionPublishPlugin(HookBaseClass):
             )
             return False
 
-        # get the path in a normalized state. no trailing separator,
-        # separators are appropriate for current os, no double separators,
-        # etc.
-        sgtk.util.ShotgunPath.normalize(path)
+        # ensure we have an updated project root
+        project_root = os.path.dirname(path)
+        item.properties["project_root"] = project_root
 
-        # get the publish name for this file path. this will ensure we get a
-        # consistent publish name when looking up existing publishes.
-        publish_name = publisher.util.get_publish_name(path)
-
-        # see if there are any other publishes of this path with a status.
-        # Note the name, context, and path *must* match the values supplied to
-        # register_publish in the publish phase in order for this to return an
-        # accurate list of previous publishes of this file.
-        publishes = publisher.util.get_conflicting_publishes(
-            item.context,
-            path,
-            publish_name,
-            filters=["sg_status_list", "is_not", None]
-        )
-
-        if publishes:
-            conflict_info = (
-                "If you continue, these conflicting publishes will no longer "
-                "be available to other users via the loader:<br>"
-                "<pre>%s</pre>" % (pprint.pformat(publishes),)
-            )
-            self.logger.warn(
-                "Found %s conflicting publishes in Shotgun" %
-                (len(publishes),),
+        # log if no project root could be determined.
+        if not project_root:
+            self.logger.info(
+                "Your session is not part of a Motion Builder project.",
                 extra={
-                    "action_show_more_info": {
-                        "label": "Show Conflicts",
-                        "tooltip": "Show the conflicting publishes in Shotgun",
-                        "text": conflict_info
+                    "action_button": {
+                        "label": "Set Project",
+                        "tooltip": "Set the Motion Builder project",
+                        "callback": _get_save_as_action()
                     }
                 }
             )
@@ -301,19 +256,19 @@ class MotionBuilderSessionPublishPlugin(HookBaseClass):
         else:
             self.logger.debug("No work template configured.")
 
-        # if the file has a version number in it, see if the next version exists
-        next_version_path = publisher.util.get_next_version_path(path)
+        # ---- see if the version can be bumped post-publish
+
+        # check to see if the next version of the work file already exists on
+        # disk. if so, warn the user and provide the ability to jump to save
+        # to that version now
+        (next_version_path, version) = self._get_next_version_info(path, item)
         if next_version_path and os.path.exists(next_version_path):
 
             # determine the next available version_number. just keep asking for
             # the next one until we get one that doesn't exist.
             while os.path.exists(next_version_path):
-                next_version_path = publisher.util.get_next_version_path(
-                    next_version_path)
-
-            # now extract the version number of the next available to display
-            # to the user
-            version = publisher.util.get_version_number(next_version_path)
+                (next_version_path, version) = self._get_next_version_info(
+                    next_version_path, item)
 
             self.logger.error(
                 "The next version of this file already exists on disk.",
@@ -353,8 +308,6 @@ class MotionBuilderSessionPublishPlugin(HookBaseClass):
             instances.
         :param item: Item to process
         """
-
-        publisher = self.parent
 
         # get the path in a normalized state. no trailing separator, separators
         # are appropriate for current os, no double separators, etc.
