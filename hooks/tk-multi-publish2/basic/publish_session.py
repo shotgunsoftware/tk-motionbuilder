@@ -174,6 +174,12 @@ class MotionBuilderSessionPublishPlugin(HookBaseClass):
                 extra=_get_save_as_action()
             )
 
+        # because a publish template is configured, disable context change. This
+        # is a temporary measure until the publisher handles context switching
+        # natively.
+        if settings.get("Publish Template").value:
+            item.context_change_allowed = False
+
         self.logger.info(
             "Motion Builder '%s' plugin accepted the current Motion Builder session." %
             (self.name,)
