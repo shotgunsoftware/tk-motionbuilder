@@ -11,7 +11,7 @@
 import os
 import sgtk
 
-from pyfbsdk import FBApplication
+from pyfbsdk import *
 
 mb_app = FBApplication()
 
@@ -307,6 +307,22 @@ def _save_session(path):
     mb_app.FileSave(path)
 
 
+def _save_as_session():
+    """
+    Save the current session to the supplied path.
+    """
+
+    # Save the file using a dialog box.
+    saveDialog = FBFilePopup()
+    saveDialog.Style = FBFilePopupStyle.kFBFilePopupSave
+    saveDialog.Filter = '*'
+
+    saveDialog.Caption = 'Save As'
+    saveDialog.FileName = _session_path()
+
+    if saveDialog.Execute():
+        app.FileSave(saveDialog.FullFilename)
+
 def _get_save_as_action():
     """
 
@@ -315,7 +331,7 @@ def _get_save_as_action():
     engine = sgtk.platform.current_engine()
 
     # default save callback
-    callback = lambda: _save_session(_session_path())
+    callback = lambda: _save_as_session()
 
     # if workfiles2 is configured, use that for file save
     if "tk-multi-workfiles2" in engine.apps:
@@ -326,7 +342,7 @@ def _get_save_as_action():
     return {
         "action_button": {
             "label": "Save As...",
-            "tooltip": "Save the current session",
+            "tooltip": "Save the current Motion Builder session to a different file name",
             "callback": callback
         }
     }
