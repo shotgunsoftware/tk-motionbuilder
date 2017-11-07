@@ -11,7 +11,7 @@
 import os
 import sgtk
 
-from pyfbsdk import *
+from pyfbsdk import FBApplication, FBFilePopup, FBFilePopupStyle
 
 mb_app = FBApplication()
 
@@ -321,7 +321,7 @@ def _save_as_session():
     saveDialog.FileName = _session_path()
 
     if saveDialog.Execute():
-        app.FileSave(saveDialog.FullFilename)
+        mb_app.FileSave(saveDialog.FullFilename)
 
 def _get_save_as_action():
     """
