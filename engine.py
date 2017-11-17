@@ -101,12 +101,13 @@ class MotionBuilderEngine(tank.platform.Engine):
         # motionbuilder doesn't have good exception handling, so install our own trap
         sys.excepthook = tank_mobu_exception_trap
 
-
     def _init_pyside(self):
         """
         Handles the pyside init
         """
-        
+
+        pyside_folder = self.__get_pyside_folder();
+
         # first see if pyside is already present - in that case skip!
         try:
             from PySide import QtGui
@@ -116,21 +117,20 @@ class MotionBuilderEngine(tank.platform.Engine):
         else:
             # looks like pyside is already working! No need to do anything
             self.log_debug("PySide detected - the existing version will be used.")
+            self._add_image_format_plugins_to_library_path(pyside_folder)
             return
 
-        pyside_folder = self.__get_pyside_folder();
-        
         if sys.platform == "win32":
             pyside_path = os.path.join(self.disk_location, "resources", pyside_folder, "python")
-            sys.path.append(pyside_path)   
+            sys.path.append(pyside_path)
             dll_path = os.path.join(self.disk_location, "resources", pyside_folder, "lib")
             path = os.environ.get("PATH", "")
             path += ";%s" % dll_path
             os.environ["PATH"] = path
-                     
+
         else:
             self.log_error("Unknown platform - cannot initialize PySide!")
-        
+
         # now try to import it
         try:
             from PySide import QtCore
@@ -138,10 +138,20 @@ class MotionBuilderEngine(tank.platform.Engine):
             self.log_error("PySide could not be imported! Apps using pyside will not "
                            "operate correctly! Error reported: %s" % e)
         else:
-            self.log_debug("Adding support for various image formats via qplugins...")
-            plugin_path = os.path.join(self.disk_location, "resources", pyside_folder, "qt_plugins")
-            QtCore.QCoreApplication.addLibraryPath(plugin_path)
-            
+            self._add_image_format_plugins_to_library_path(pyside_folder)
+
+    def _add_image_format_plugins_to_library_path(self, pyside_folder):
+        """
+        Add image format plugins to path so they can be loaded and used
+
+        :param: pyside_folder Filesystem location where the plugins live
+        """
+        from PySide import QtCore
+
+        self.log_debug("Adding support for various image formats via qplugins...")
+        plugin_path = os.path.join(self.disk_location, "resources", pyside_folder, "qt_plugins")
+        QtCore.QCoreApplication.addLibraryPath(plugin_path)
+
     def _get_dialog_parent(self):
         """
         Find the main Motionbuilder window/QWidget.  This
