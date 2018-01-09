@@ -23,8 +23,6 @@ import tank
 from pyfbsdk import FBMessageBox
 from pyfbsdk import FBSystem
 
-
-
 # custom exception handler for motion builder
 def tank_mobu_exception_trap(ex_cls, ex, tb):
     # careful about infinite loops here - 
@@ -49,10 +47,6 @@ def tank_mobu_exception_trap(ex_cls, ex, tb):
         except:
             pass
         
-
-
-
-
 
 class MotionBuilderEngine(tank.platform.Engine):
 
@@ -106,7 +100,7 @@ class MotionBuilderEngine(tank.platform.Engine):
         Handles the pyside init
         """
 
-        pyside_folder = self.__get_pyside_folder();
+        pyside_folder = self.__get_pyside_folder()
 
         # first see if pyside is already present - in that case skip!
         try:
@@ -115,7 +109,8 @@ class MotionBuilderEngine(tank.platform.Engine):
             # fine, we don't expect pyside to be present just yet
             self.log_debug("PySide not detected - it will be added to the setup now...")
         else:
-            # looks like pyside is already working! No need to do anything
+            # pyside was found. we will ensure the image format plugins are
+            # available
             self.log_debug("PySide detected - the existing version will be used.")
             self._add_image_format_plugins_to_library_path(pyside_folder)
             return
@@ -148,8 +143,12 @@ class MotionBuilderEngine(tank.platform.Engine):
         """
         from PySide import QtCore
 
-        self.log_debug("Adding support for various image formats via qplugins...")
         plugin_path = os.path.join(self.disk_location, "resources", pyside_folder, "qt_plugins")
+
+        self.log_debug(
+            "Adding support for various image formats via qplugins."
+            "Plugin path: %s" % (plugin_path,)
+        )
         QtCore.QCoreApplication.addLibraryPath(plugin_path)
 
     def _get_dialog_parent(self):
