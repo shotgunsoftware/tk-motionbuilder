@@ -51,6 +51,13 @@ def tank_mobu_exception_trap(ex_cls, ex, tb):
 class MotionBuilderEngine(tank.platform.Engine):
 
     @property
+    def context_change_allowed(self):
+        """
+        Whether the engine allows a context change without the need for a restart.
+        """
+        return True
+
+    @property
     def host_info(self):
         """
         :returns: A dictionary with information about the application hosting this engine.
