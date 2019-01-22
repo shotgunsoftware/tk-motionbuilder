@@ -39,7 +39,7 @@ def tank_mobu_exception_trap(ex_cls, ex, tb):
 
     # now output it    
     try:
-        from PySide import QtGui
+        from sgtk.platform.qt import QtCore, QtGui
         QtGui.QMessageBox.critical(None, "Python Exception Raised", error_message)
     except:
         try:
@@ -104,7 +104,7 @@ class MotionBuilderEngine(tank.platform.Engine):
 
         # first see if pyside is already present - in that case skip!
         try:
-            from PySide import QtGui
+            from sgtk.platform.qt import QtCore, QtGui
         except:
             # fine, we don't expect pyside to be present just yet
             self.log_debug("PySide not detected - it will be added to the setup now...")
@@ -159,7 +159,7 @@ class MotionBuilderEngine(tank.platform.Engine):
         
         :returns: QWidget if found or None if not
         """
-        from PySide import QtGui
+        from sgtk.platform.qt import QtCore, QtGui
         
         # get all top level windows:
         top_level_windows = QtGui.QApplication.topLevelWidgets()
