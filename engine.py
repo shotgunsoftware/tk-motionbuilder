@@ -128,7 +128,7 @@ class MotionBuilderEngine(tank.platform.Engine):
 
         # now try to import it
         try:
-            from PySide import QtCore
+            from sgtk.platform.qt import QtCore, QtGui
         except Exception, e:
             self.log_error("PySide could not be imported! Apps using pyside will not "
                            "operate correctly! Error reported: %s" % e)
@@ -141,7 +141,7 @@ class MotionBuilderEngine(tank.platform.Engine):
 
         :param: pyside_folder Filesystem location where the plugins live
         """
-        from PySide import QtCore
+        from sgtk.platform.qt import QtCore, QtGui
 
         plugin_path = os.path.join(self.disk_location, "resources", pyside_folder, "qt_plugins")
 
