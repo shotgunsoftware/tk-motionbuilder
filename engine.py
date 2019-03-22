@@ -86,6 +86,13 @@ class MotionBuilderEngine(tank.platform.Engine):
 
         return host_info
     
+    @property
+    def context_change_allowed(self):
+        """
+        Whether the engine allows a context change without the need for a restart.
+        """
+        return True
+
     def init_engine(self):
         self.log_debug("%s: Initializing..." % self)
         
@@ -157,6 +164,16 @@ class MotionBuilderEngine(tank.platform.Engine):
             
         tk_motionbuilder = self.import_module("tk_motionbuilder")                
         self._menu_generator = tk_motionbuilder.MenuGenerator(self, menu_name)
+        self._menu_generator.create_menu()
+
+    def post_context_change(self, old_context, new_context):
+        """
+        Handles post-context-change requirements.
+        :param old_context: The sgtk.context.Context being switched away from.
+        :param new_context: The sgtk.context.Context being switched to.
+        """
+        self.logger.debug("tk-motionbuilder context changed to %s", str(new_context))
+        self._menu_generator.destroy_menu()
         self._menu_generator.create_menu()
 
     def destroy_engine(self):
