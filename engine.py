@@ -15,6 +15,7 @@ A MotionBuilder engine for Shotgun.
 
 import os
 import sys
+import logging
 
 # tank libs
 import tank
@@ -156,44 +157,63 @@ class MotionBuilderEngine(tank.platform.Engine):
         return None
 
     def post_app_init(self):
-        # default menu name is Shotgun but this can be overriden
-        # in the configuration to be Sgtk in case of conflicts
-        menu_name = "Shotgun"
-        if self.get_setting("use_sgtk_as_menu_name", False):
-            menu_name = "Sgtk"
-            
-        tk_motionbuilder = self.import_module("tk_motionbuilder")                
-        self._menu_generator = tk_motionbuilder.MenuGenerator(self, menu_name)
-        self._menu_generator.create_menu()
+        """
+        Executes once all apps have been initialized
+        """
+        self._initialize_menu()
 
     def post_context_change(self, old_context, new_context):
         """
         Handles post-context-change requirements.
+
         :param old_context: The sgtk.context.Context being switched away from.
         :param new_context: The sgtk.context.Context being switched to.
         """
         self.logger.debug("tk-motionbuilder context changed to %s", str(new_context))
         self._menu_generator.destroy_menu()
-        self._menu_generator.create_menu()
+        self._initialize_menu()
 
     def destroy_engine(self):
+        """
+        Uninitialize engine state
+        """
         self.log_debug('%s: Destroying...' % self)
         self._menu_generator.destroy_menu()
 
-    def log_debug(self, msg):
-        if self.get_setting("debug_logging", False):
+    def _initialize_menu(self):
+        """
+        Creates a new motionbuilder menu 
+        to reflect currently loaded apps.
+        """
+        tk_motionbuilder = self.import_module("tk_motionbuilder")                
+        self._menu_generator = tk_motionbuilder.MenuGenerator(self, "Shotgun")
+        self._menu_generator.create_menu()
+
+    def _emit_log_message(self, handler, record):
+        """
+        Called by the engine to log messages in Mobu script editor.
+        All log messages from the toolkit logging namespace will be passed to this method.
+        :param handler: Log handler that this message was dispatched from.
+                        Its default format is "[levelname basename] message".
+        :type handler: :class:`~python.logging.LogHandler`
+        :param record: Standard python logging record.
+        :type record: :class:`~python.logging.LogRecord`
+        """
+        # Give a standard format to the message:
+        #     Shotgun <basename>: <message>
+        # where "basename" is the leaf part of the logging record name,
+        # for example "tk-multi-shotgunpanel" or "qt_importer".
+        if record.levelno < logging.INFO:
+            formatter = logging.Formatter("Debug: Shotgun %(basename)s: %(message)s")
+        else:
+            formatter = logging.Formatter("Shotgun %(basename)s: %(message)s")
+
+        msg = formatter.format(record)
+
+        # Select Maya display function to use according to the logging record level.
+        if record.levelno < logging.ERROR:
             print msg
-
-    def log_info(self, msg):
-        msg = "Shotgun: %s" % msg
-        print msg
-
-    def log_error(self, msg):
-        FBMessageBox( "Shotgun Error",  str(msg), "OK" )
-
-    def log_warning(self, msg):
-        msg = "Shotgun Warning: %s" % msg
-        print msg
-
+        else:
+            FBMessageBox("Shotgun Error", str(msg), "OK")
 
 
