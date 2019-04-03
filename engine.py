@@ -1,11 +1,11 @@
 # Copyright (c) 2013 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 """
@@ -15,36 +15,35 @@ A MotionBuilder engine for Shotgun.
 
 import os
 import sys
+import sgtk
 import logging
-
-# tank libs
-import tank
 
 # application libs
 from pyfbsdk import FBMessageBox
 from pyfbsdk import FBSystem
 
+
 # custom exception handler for motion builder
-def tank_mobu_exception_trap(ex_cls, ex, tb):
-    # careful about infinite loops here - 
+def sgtk_mobu_exception_trap(ex_cls, ex, tb):
+    # careful about infinite loops here -
     # MUST NOT RAISE EXCEPTIONS :)
-    
+
     # assemble message
     error_message = "Could not format error message"
     try:
         import traceback
         tb_str = "\n".join(traceback.format_tb(tb))
         error_message = "A Python Exception was Caught!\n\nDetails: %s\nError Type: %s\n\nTraceback:\n%s" % (ex, ex_cls, tb_str)
-    except:
+    except Exception:
         pass
 
-    # now output it    
+    # now output it
     try:
-        from tank.util.qt_importer import QtImporter
+        from sgtk.util.qt_importer import QtImporter
         qt = QtImporter()
         qt.QtGui.QMessageBox.critical(
-            None, 
-            "Python Exception Raised", 
+            None,
+            "Python Exception Raised",
             error_message
         )
     except:
@@ -52,9 +51,9 @@ def tank_mobu_exception_trap(ex_cls, ex, tb):
             print str(error_message)
         except:
             pass
-        
 
-class MotionBuilderEngine(tank.platform.Engine):
+
+class MotionBuilderEngine(sgtk.platform.Engine):
 
     @property
     def host_info(self):
@@ -86,7 +85,7 @@ class MotionBuilderEngine(tank.platform.Engine):
             pass
 
         return host_info
-    
+
     @property
     def context_change_allowed(self):
         """
@@ -95,11 +94,11 @@ class MotionBuilderEngine(tank.platform.Engine):
         return True
 
     def init_engine(self):
-        self.log_debug("%s: Initializing..." % self)
-        
+        self.logger.debug("%s: Initializing..." % self)
+
         if self.context.project is None:
             # must have at least a project in the context to even start!
-            raise tank.TankError("The Motionbuilder engine needs at least a project in the context "
+            raise sgtk.TankError("The Motionbuilder engine needs at least a project in the context "
                                  "in order to start! Your context: %s" % self.context)
 
         MOTIONBUILDER_2018_VERSION = 18000.0
@@ -109,7 +108,7 @@ class MotionBuilderEngine(tank.platform.Engine):
             self._add_qt470_image_format_plugins_to_library_path()
 
         # motionbuilder doesn't have good exception handling, so install our own trap
-        sys.excepthook = tank_mobu_exception_trap
+        sys.excepthook = sgtk_mobu_exception_trap
 
     def _add_qt470_image_format_plugins_to_library_path(self):
         """
@@ -119,16 +118,16 @@ class MotionBuilderEngine(tank.platform.Engine):
         these plugins are missing from the version of PySide that is
         shipped with the DCC.
         """
-        from tank.platform.qt import QtCore
+        from sgtk.platform.qt import QtCore
 
         plugin_path = os.path.join(
-            self.disk_location, 
-            "resources", 
-            "qt470_win64_vs2010", 
+            self.disk_location,
+            "resources",
+            "qt470_win64_vs2010",
             "qt_plugins"
         )
 
-        self.log_debug(
+        self.logger.debug(
             "Adding support for various image formats via qplugins."
             "Plugin path: %s" % (plugin_path,)
         )
@@ -139,21 +138,21 @@ class MotionBuilderEngine(tank.platform.Engine):
         Find the main Motionbuilder window/QWidget.  This
         will be used as the parent for all dialogs created
         by show_modal or show_dialog
-        
+
         :returns: QWidget if found or None if not
         """
-        from tank.platform.qt import QtGui
-        
+        from sgtk.platform.qt import QtGui
+
         # get all top level windows:
         top_level_windows = QtGui.QApplication.topLevelWidgets()
-        
+
         # from this list, find the main application window.
         for w in top_level_windows:
-            if (type(w) == QtGui.QWidget        # window is always QWidget 
-                and len(w.windowTitle()) > 0    # window always has a title/caption
-                and w.parentWidget() == None):  # parent widget is always None
+            if (type(w) == QtGui.QWidget  # window is always QWidget
+                    and len(w.windowTitle()) > 0  # window always has a title/caption
+                    and w.parentWidget() == None):  # parent widget is always None
                 return w
-        
+
         return None
 
     def post_app_init(self):
@@ -177,15 +176,15 @@ class MotionBuilderEngine(tank.platform.Engine):
         """
         Uninitialize engine state
         """
-        self.log_debug('%s: Destroying...' % self)
+        self.logger.debug('%s: Destroying...' % self)
         self._menu_generator.destroy_menu()
 
     def _initialize_menu(self):
         """
-        Creates a new motionbuilder menu 
+        Creates a new motionbuilder menu
         to reflect currently loaded apps.
         """
-        tk_motionbuilder = self.import_module("tk_motionbuilder")                
+        tk_motionbuilder = self.import_module("tk_motionbuilder")
         self._menu_generator = tk_motionbuilder.MenuGenerator(self, "Shotgun")
         self._menu_generator.create_menu()
 
@@ -210,10 +209,8 @@ class MotionBuilderEngine(tank.platform.Engine):
 
         msg = formatter.format(record)
 
-        # Select Maya display function to use according to the logging record level.
         if record.levelno < logging.ERROR:
             print msg
         else:
+            # for errors, pop up a modal msgbox
             FBMessageBox("Shotgun Error", str(msg), "OK")
-
-

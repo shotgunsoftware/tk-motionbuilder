@@ -1,11 +1,11 @@
 # Copyright (c) 2013 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 """
@@ -15,9 +15,7 @@ Callbacks to manage the engine when a new file is loaded in shotgun.
 import os
 import sys
 import traceback
-
-#tank libs
-import tank
+import sgtk
 
 # application libs
 from pyfbsdk import FBMessageBox
@@ -27,7 +25,7 @@ from pyfbsdk import FBMenuManager
 from .menu_generation import MenuGenerator
 
 
-def __show_tank_disabled_message(details):
+def __show_sgtk_disabled_message(details):
     """
     Message when user clicks the shotgun is disabled menu
     """
@@ -38,7 +36,8 @@ def __show_tank_disabled_message(details):
            "file. <br><br><i>Details:</i> %s" % details)
     FBMessageBox( "Shotgun Error",  msg, "OK" )
 
-def __create_tank_disabled_menu(details):
+
+def __create_sgtk_disabled_menu(details):
     """
     Creates a std "disabled" Shotgun menu
     """
@@ -50,11 +49,11 @@ def __create_tank_disabled_menu(details):
     menu.InsertLast("Sgtk is disabled.", 1)
 
     def menu_event(control, event):
-        __show_tank_disabled_message(details)
+        __show_sgtk_disabled_message(details)
     menu.OnMenuActivate.Add(menu_event)
 
 
-def __create_tank_error_menu():
+def __create_sgtk_error_menu():
     """
     Creates a std "error" shotgun menu and grabs the current context.
     Make sure that this is called from inside an except clause.
@@ -86,7 +85,7 @@ def __engine_refresh(tk, new_context):
 
     engine_name = os.environ.get("TANK_MOTIONBUILDER_ENGINE_INIT_NAME")
 
-    curr_engine = tank.platform.current_engine()
+    curr_engine = sgtk.platform.current_engine()
     if curr_engine:
         # an old engine is running.
         if new_context == curr_engine.context:
@@ -98,9 +97,7 @@ def __engine_refresh(tk, new_context):
 
     # try to create new engine
     try:
-        tank.platform.start_engine(engine_name, tk, new_context)
-    except tank.TankEngineInitError, e:
+        sgtk.platform.start_engine(engine_name, tk, new_context)
+    except sgtk.TankEngineInitError, e:
         # context was not sufficient! - disable tank!
-        __create_tank_disabled_menu(e)
-
-
+        __create_sgtk_disabled_menu(e)

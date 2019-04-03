@@ -1,11 +1,11 @@
 # Copyright (c) 2013 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 """
@@ -14,12 +14,16 @@ Menu handling for Nuke
 """
 import os
 import sys
+import sgtk
 import webbrowser
 import unicodedata
 
 from pyfbsdk import FBSystem
-from pyfbsdk import FBMenuManager 
+from pyfbsdk import FBMenuManager
 from pyfbsdk import FBGenericMenu
+
+logger = sgtk.platform.get_logger(__name__)
+
 
 class MenuGenerator(object):
     """
@@ -31,16 +35,16 @@ class MenuGenerator(object):
         self._menu_name = menu_name
         self.__menu_index = 1
         self._callbacks = {}
-        
-        # Currently, root-level menu items seem to cause Motionbuilder 2011 & 2012 to 
-        # crash (2013+ works fine though).  sub-menus work correctly so for <=2012 we 
-        # force everything to be at least one level deep so at least it's stable!        
+
+        # Currently, root-level menu items seem to cause Motionbuilder 2011 & 2012 to
+        # crash (2013+ works fine though).  sub-menus work correctly so for <=2012 we
+        # force everything to be at least one level deep so at least it's stable!
         fb_sys = FBSystem()
-        self.__all_menus_nested = (fb_sys.Version < 13000.0)  
+        self.__all_menus_nested = (fb_sys.Version < 13000.0)
 
     ##########################################################################################
     # public methods
-    
+
     def create_menu(self):
         """
         Render the entire Shotgun menu.
@@ -51,11 +55,11 @@ class MenuGenerator(object):
         if not sg_menu:
             menu_mgr.InsertBefore(None, "&Help", self._menu_name)
             sg_menu = menu_mgr.GetMenu(self._menu_name)
-            
+
         if not self.__all_menus_nested:
             # need to handle root-level menu items
             sg_menu.OnMenuActivate.Add(self.__menu_event)
-        
+
         # now add the context item on top of the main menu
         context_menu = self._add_context_menu(sg_menu)
 
@@ -72,22 +76,22 @@ class MenuGenerator(object):
             for (cmd_name, cmd_details) in self._engine.commands.items():
                 cmd = AppCommand(cmd_name, cmd_details)
                 if cmd.get_app_instance_name() == app_instance_name and cmd.name == menu_name:
-                    # found our match!                    
+                    # found our match!
                     if self.__all_menus_nested:
                         # workaround for bug in 2012 which causes Motionbuilder to crash
                         # when clicking on root-level menu items
                         if not favourites_menu:
                             favourites_menu = FBGenericMenu()
                             favourites_menu.OnMenuActivate.Add(self.__menu_event)
-                            sg_menu.InsertLast("Favorites", self.__next_menu_index(), favourites_menu)                            
+                            sg_menu.InsertLast("Favorites", self.__next_menu_index(), favourites_menu)
                     else:
                         favourites_menu = sg_menu
-                    
+
                     # add to the favourites section of the menu:
                     cmd.add_command_to_menu(favourites_menu, self.__next_menu_index())
-                    
+
                     # mark as a favourite item
-                    cmd.favourite = True            
+                    cmd.favourite = True
 
         if favourites_menu:
             # add separator:
@@ -120,7 +124,7 @@ class MenuGenerator(object):
     def destroy_menu(self):
         menu_mgr = FBMenuManager()
         menu = menu_mgr.GetMenu(self._menu_name)
-        
+
         if menu:
             item = menu.GetFirstItem()
             while item:
@@ -165,8 +169,8 @@ class MenuGenerator(object):
     def _jump_to_sg(self):
         """
         Jump to shotgun, launch web browser
-        """        
-        url = self._engine.context.shotgun_url        
+        """
+        url = self._engine.context.shotgun_url
         webbrowser.open(url)
 
     def _jump_to_fs(self):
@@ -177,9 +181,9 @@ class MenuGenerator(object):
         paths = self._engine.context.filesystem_locations
         for disk_location in paths:
 
-            # get the setting        
+            # get the setting
             system = sys.platform
-            
+
             # run the app
             if system == "linux2":
                 cmd = 'xdg-open "%s"' % disk_location
@@ -192,7 +196,7 @@ class MenuGenerator(object):
 
             exit_code = os.system(cmd)
             if exit_code != 0:
-                self._engine.log_error("Failed to launch '%s'!" % cmd)
+                logger.error("Failed to launch '%s'!" % cmd)
 
     ##########################################################################################
     # app menus
@@ -228,8 +232,8 @@ class MenuGenerator(object):
 
     def __next_menu_index(self):
         """
-        Get the next sequential menu index.  I think these need to be 
-        unique within the Shotgun menu but they aren't used directly 
+        Get the next sequential menu index.  I think these need to be
+        unique within the Shotgun menu but they aren't used directly
         by Toolkit anywhere
         """
         idx = self.__menu_index
@@ -248,15 +252,15 @@ class MenuGenerator(object):
             # be rebuilt) can cause Motionbuilder to crash!
             from sgtk.platform.qt import QtCore
             QtCore.QTimer.singleShot(100, callback)
-            
+
     def __strip_unicode(self, val):
         """
         Get rid of unicode
         """
         if val.__class__ == unicode:
             val = unicodedata.normalize('NFKD', val).encode('ascii', 'ignore')
-        return val   
-            
+        return val
+
 
 class AppCommand(object):
     """
@@ -268,7 +272,7 @@ class AppCommand(object):
         self.properties = command_dict["properties"]
         self.callback = command_dict["callback"]
         self.favourite = False
-        
+
         # deal with mobu's inability to handle unicode. #fail
         if name.__class__ == unicode:
             self.name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
