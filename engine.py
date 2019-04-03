@@ -148,9 +148,9 @@ class MotionBuilderEngine(sgtk.platform.Engine):
 
         # from this list, find the main application window.
         for w in top_level_windows:
-            if (type(w) == QtGui.QWidget  # window is always QWidget
-                    and len(w.windowTitle()) > 0  # window always has a title/caption
-                    and w.parentWidget() == None):  # parent widget is always None
+            if (type(w) == QtGui.QWidget and  # window is always QWidget
+                    len(w.windowTitle()) > 0 and  # window always has a title/caption
+                    w.parentWidget() is None):  # parent widget is always None
                 return w
 
         return None
