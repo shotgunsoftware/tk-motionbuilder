@@ -101,14 +101,37 @@ class MotionBuilderEngine(sgtk.platform.Engine):
             raise sgtk.TankError("The Motionbuilder engine needs at least a project in the context "
                                  "in order to start! Your context: %s" % self.context)
 
-        MOTIONBUILDER_2018_VERSION = 18000.0
+        # motionbuilder doesn't have good exception handling, so install our own trap
+        sys.excepthook = sgtk_mobu_exception_trap
 
+    def post_app_init(self):
+        """
+        Executes once all apps have been initialized
+        """
+        MOTIONBUILDER_2018_VERSION = 18000.0
         if FBSystem().Version < MOTIONBUILDER_2018_VERSION:
             # older versions are missing image plugins, hotpatch them in.
             self._add_qt470_image_format_plugins_to_library_path()
 
-        # motionbuilder doesn't have good exception handling, so install our own trap
-        sys.excepthook = sgtk_mobu_exception_trap
+        self._initialize_menu()
+
+    def post_context_change(self, old_context, new_context):
+        """
+        Handles post-context-change requirements.
+
+        :param old_context: The sgtk.context.Context being switched away from.
+        :param new_context: The sgtk.context.Context being switched to.
+        """
+        self.logger.debug("tk-motionbuilder context changed to %s", str(new_context))
+        self._menu_generator.destroy_menu()
+        self._initialize_menu()
+
+    def destroy_engine(self):
+        """
+        Uninitialize engine state
+        """
+        self.logger.debug('%s: Destroying...' % self)
+        self._menu_generator.destroy_menu()
 
     def _add_qt470_image_format_plugins_to_library_path(self):
         """
@@ -152,30 +175,6 @@ class MotionBuilderEngine(sgtk.platform.Engine):
                 return w
 
         return None
-
-    def post_app_init(self):
-        """
-        Executes once all apps have been initialized
-        """
-        self._initialize_menu()
-
-    def post_context_change(self, old_context, new_context):
-        """
-        Handles post-context-change requirements.
-
-        :param old_context: The sgtk.context.Context being switched away from.
-        :param new_context: The sgtk.context.Context being switched to.
-        """
-        self.logger.debug("tk-motionbuilder context changed to %s", str(new_context))
-        self._menu_generator.destroy_menu()
-        self._initialize_menu()
-
-    def destroy_engine(self):
-        """
-        Uninitialize engine state
-        """
-        self.logger.debug('%s: Destroying...' % self)
-        self._menu_generator.destroy_menu()
 
     def _initialize_menu(self):
         """
