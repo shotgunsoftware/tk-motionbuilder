@@ -14,11 +14,6 @@
 # expected fields in the configuration file for this engine
 configuration:
 
-    debug_logging:
-            type: bool
-            description: Controls whether debug messages should be emitted to the logger
-            default_value: false
-
     menu_favourites:
         type: list
         description: "Controls the favourites section on the main menu. This is a list
@@ -32,11 +27,6 @@ configuration:
             items:
                 name: { type: str }
                 app_instance: { type: str }
-
-    use_sgtk_as_menu_name:
-        type: bool
-        description: Optionally choose to use 'Sgtk' as the primary menu name instead of 'Shotgun'
-        default_value: false
         
 # the Shotgun fields that this engine needs in order to operate correctly
 requires_shotgun_fields:
@@ -47,5 +37,5 @@ description: "Shotgun Integration in Motionbuilder"
 
 # Required minimum versions for this item to run
 requires_shotgun_version:
-requires_core_version: "v0.14.23"
+requires_core_version: "v0.18.23"
 
