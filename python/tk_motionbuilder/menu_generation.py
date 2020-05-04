@@ -40,7 +40,7 @@ class MenuGenerator(object):
         # crash (2013+ works fine though).  sub-menus work correctly so for <=2012 we
         # force everything to be at least one level deep so at least it's stable!
         fb_sys = FBSystem()
-        self.__all_menus_nested = (fb_sys.Version < 13000.0)
+        self.__all_menus_nested = fb_sys.Version < 13000.0
 
     ##########################################################################################
     # public methods
@@ -75,7 +75,10 @@ class MenuGenerator(object):
             # scan through all menu items
             for (cmd_name, cmd_details) in self._engine.commands.items():
                 cmd = AppCommand(cmd_name, cmd_details)
-                if cmd.get_app_instance_name() == app_instance_name and cmd.name == menu_name:
+                if (
+                    cmd.get_app_instance_name() == app_instance_name
+                    and cmd.name == menu_name
+                ):
                     # found our match!
                     if self.__all_menus_nested:
                         # workaround for bug in 2012 which causes Motionbuilder to crash
@@ -83,7 +86,9 @@ class MenuGenerator(object):
                         if not favourites_menu:
                             favourites_menu = FBGenericMenu()
                             favourites_menu.OnMenuActivate.Add(self.__menu_event)
-                            sg_menu.InsertLast("Favorites", self.__next_menu_index(), favourites_menu)
+                            sg_menu.InsertLast(
+                                "Favorites", self.__next_menu_index(), favourites_menu
+                            )
                     else:
                         favourites_menu = sg_menu
 
@@ -251,6 +256,7 @@ class MenuGenerator(object):
             # any apps that restart the engine (causing the menu to
             # be rebuilt) can cause Motionbuilder to crash!
             from sgtk.platform.qt import QtCore
+
             QtCore.QTimer.singleShot(100, callback)
 
     def __strip_unicode(self, val):
@@ -258,7 +264,7 @@ class MenuGenerator(object):
         Get rid of unicode
         """
         if val.__class__ == unicode:
-            val = unicodedata.normalize('NFKD', val).encode('ascii', 'ignore')
+            val = unicodedata.normalize("NFKD", val).encode("ascii", "ignore")
         return val
 
 
@@ -275,7 +281,7 @@ class AppCommand(object):
 
         # deal with mobu's inability to handle unicode. #fail
         if name.__class__ == unicode:
-            self.name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
+            self.name = unicodedata.normalize("NFKD", name).encode("ascii", "ignore")
         else:
             self.name = name
 
@@ -314,7 +320,9 @@ class AppCommand(object):
             doc_url = app.documentation_url
             # deal with nuke's inability to handle unicode. #fail
             if doc_url.__class__ == unicode:
-                doc_url = unicodedata.normalize('NFKD', doc_url).encode('ascii', 'ignore')
+                doc_url = unicodedata.normalize("NFKD", doc_url).encode(
+                    "ascii", "ignore"
+                )
             return doc_url
 
         return None

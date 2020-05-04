@@ -29,12 +29,14 @@ def __show_sgtk_disabled_message(details):
     """
     Message when user clicks the shotgun is disabled menu
     """
-    msg = ("Shotgun integration is currently disabled because the file you "
-           "have opened is not recognized - Shotgun cannot "
-           "determine which Context the currently open file belongs to. "
-           "In order to enable the Shotgun functionality, try opening another "
-           "file. <br><br><i>Details:</i> %s" % details)
-    FBMessageBox( "Shotgun Error",  msg, "OK" )
+    msg = (
+        "Shotgun integration is currently disabled because the file you "
+        "have opened is not recognized - Shotgun cannot "
+        "determine which Context the currently open file belongs to. "
+        "In order to enable the Shotgun functionality, try opening another "
+        "file. <br><br><i>Details:</i> %s" % details
+    )
+    FBMessageBox("Shotgun Error", msg, "OK")
 
 
 def __create_sgtk_disabled_menu(details):
@@ -50,6 +52,7 @@ def __create_sgtk_disabled_menu(details):
 
     def menu_event(control, event):
         __show_sgtk_disabled_message(details)
+
     menu.OnMenuActivate.Add(menu_event)
 
 
@@ -64,7 +67,7 @@ def __create_sgtk_error_menu():
     message += "Please contact support@shotgunsoftware.com\n\n"
     message += "Exception: %s - %s\n" % (exc_type, exc_value)
     message += "Traceback (most recent call last):\n"
-    message += "\n".join( traceback.format_tb(exc_traceback))
+    message += "\n".join(traceback.format_tb(exc_traceback))
 
     menu_mgr = FBMenuManager()
     menu = menu_mgr.GetMenu("Shotgun")
@@ -74,7 +77,8 @@ def __create_sgtk_error_menu():
     menu.InsertLast("[Shotgun Error - Click for details]", 1)
 
     def menu_event(control, event):
-        FBMessageBox( "Shotgun Error",  message, "OK" )
+        FBMessageBox("Shotgun Error", message, "OK")
+
     menu.OnMenuActivate.Add(menu_event)
 
 

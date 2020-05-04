@@ -33,20 +33,21 @@ def sgtk_mobu_exception_trap(ex_cls, ex, tb):
     error_message = "Could not format error message"
     try:
         import traceback
+
         tb_str = "\n".join(traceback.format_tb(tb))
-        error_message = "A Python Exception was Caught!\n\nDetails: %s\nError Type: %s\n\nTraceback:\n%s" % (ex, ex_cls, tb_str)
+        error_message = (
+            "A Python Exception was Caught!\n\nDetails: %s\nError Type: %s\n\nTraceback:\n%s"
+            % (ex, ex_cls, tb_str)
+        )
     except Exception:
         pass
 
     # now output it
     try:
         from sgtk.util.qt_importer import QtImporter
+
         qt = QtImporter()
-        qt.QtGui.QMessageBox.critical(
-            None,
-            "Python Exception Raised",
-            error_message
-        )
+        qt.QtGui.QMessageBox.critical(None, "Python Exception Raised", error_message)
     except:
         try:
             print((str(error_message)))
@@ -55,7 +56,6 @@ def sgtk_mobu_exception_trap(ex_cls, ex, tb):
 
 
 class MotionBuilderEngine(sgtk.platform.Engine):
-
     @property
     def host_info(self):
         """
@@ -99,8 +99,10 @@ class MotionBuilderEngine(sgtk.platform.Engine):
 
         if self.context.project is None:
             # must have at least a project in the context to even start!
-            raise sgtk.TankError("The Motionbuilder engine needs at least a project in the context "
-                                 "in order to start! Your context: %s" % self.context)
+            raise sgtk.TankError(
+                "The Motionbuilder engine needs at least a project in the context "
+                "in order to start! Your context: %s" % self.context
+            )
 
         # motionbuilder doesn't have good exception handling, so install our own trap
         sys.excepthook = sgtk_mobu_exception_trap
@@ -131,7 +133,7 @@ class MotionBuilderEngine(sgtk.platform.Engine):
         """
         Uninitialize engine state
         """
-        self.logger.debug('%s: Destroying...' % self)
+        self.logger.debug("%s: Destroying..." % self)
         self._menu_generator.destroy_menu()
 
     def _add_qt470_image_format_plugins_to_library_path(self):
@@ -145,10 +147,7 @@ class MotionBuilderEngine(sgtk.platform.Engine):
         from sgtk.platform.qt import QtCore
 
         plugin_path = os.path.join(
-            self.disk_location,
-            "resources",
-            "qt470_win64_vs2010",
-            "qt_plugins"
+            self.disk_location, "resources", "qt470_win64_vs2010", "qt_plugins"
         )
 
         self.logger.debug(
@@ -172,7 +171,11 @@ class MotionBuilderEngine(sgtk.platform.Engine):
 
         # from this list, find the main application window.
         for w in top_level_windows:
-            if type(w) == QtGui.QWidget and len(w.windowTitle()) > 0 and w.parentWidget() is None:
+            if (
+                type(w) == QtGui.QWidget
+                and len(w.windowTitle()) > 0
+                and w.parentWidget() is None
+            ):
                 return w
 
         return None
