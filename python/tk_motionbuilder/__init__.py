@@ -98,6 +98,6 @@ def __engine_refresh(tk, new_context):
     # try to create new engine
     try:
         sgtk.platform.start_engine(engine_name, tk, new_context)
-    except sgtk.TankEngineInitError, e:
+    except sgtk.TankEngineInitError as e:
         # context was not sufficient! - disable tank!
         __create_sgtk_disabled_menu(e)

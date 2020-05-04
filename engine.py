@@ -13,6 +13,7 @@ A MotionBuilder engine for Shotgun.
 
 """
 
+from __future__ import print_function
 import os
 import sys
 import sgtk
@@ -48,7 +49,7 @@ def sgtk_mobu_exception_trap(ex_cls, ex, tb):
         )
     except:
         try:
-            print str(error_message)
+            print((str(error_message)))
         except:
             pass
 
@@ -207,7 +208,7 @@ class MotionBuilderEngine(sgtk.platform.Engine):
         msg = formatter.format(record)
 
         if record.levelno < logging.ERROR:
-            print msg
+            print(msg)
         else:
             # for errors, pop up a modal msgbox
             FBMessageBox("Shotgun Error", str(msg), "OK")
