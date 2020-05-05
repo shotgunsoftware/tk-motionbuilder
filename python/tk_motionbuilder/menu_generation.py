@@ -9,7 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 """
-Menu handling for Nuke
+Menu handling for Motionbuilder
 
 """
 import os
@@ -17,6 +17,7 @@ import sys
 import sgtk
 import webbrowser
 import unicodedata
+from tank_vendor import six
 
 from pyfbsdk import FBSystem
 from pyfbsdk import FBMenuManager
@@ -27,7 +28,7 @@ logger = sgtk.platform.get_logger(__name__)
 
 class MenuGenerator(object):
     """
-    Menu generation functionality for Nuke
+    Menu generation functionality for Motionbuilder
     """
 
     def __init__(self, engine, menu_name):
@@ -186,18 +187,15 @@ class MenuGenerator(object):
         paths = self._engine.context.filesystem_locations
         for disk_location in paths:
 
-            # get the setting
-            system = sys.platform
-
             # run the app
-            if system == "linux2":
+            if sgtk.util.is_linux():
                 cmd = 'xdg-open "%s"' % disk_location
-            elif system == "darwin":
-                cmd = 'open "%s"' % disk_location
-            elif system == "win32":
+            elif sgtk.util.is_windows()():
                 cmd = 'cmd.exe /C start "Folder" "%s"' % disk_location
+            elif sgtk.util.is_macos():
+                cmd = 'open "%s"' % disk_location
             else:
-                raise Exception("Platform '%s' is not supported." % system)
+                raise Exception("Platform '%s' is not supported." % sys.platform)
 
             exit_code = os.system(cmd)
             if exit_code != 0:
@@ -263,8 +261,8 @@ class MenuGenerator(object):
         """
         Get rid of unicode
         """
-        if val.__class__ == unicode:
-            val = unicodedata.normalize("NFKD", val).encode("ascii", "ignore")
+        if type(val) is six.text_type:
+            val = six.ensure_str(unicodedata.normalize("NFKD", val), "ascii", "ignore")
         return val
 
 
@@ -280,8 +278,10 @@ class AppCommand(object):
         self.favourite = False
 
         # deal with mobu's inability to handle unicode. #fail
-        if name.__class__ == unicode:
-            self.name = unicodedata.normalize("NFKD", name).encode("ascii", "ignore")
+        if type(name) is six.text_type:
+            self.name = six.ensure_str(
+                unicodedata.normalize("NFKD", name), "ascii", "ignore"
+            )
         else:
             self.name = name
 
@@ -319,9 +319,9 @@ class AppCommand(object):
             app = self.properties["app"]
             doc_url = app.documentation_url
             # deal with nuke's inability to handle unicode. #fail
-            if doc_url.__class__ == unicode:
-                doc_url = unicodedata.normalize("NFKD", doc_url).encode(
-                    "ascii", "ignore"
+            if type(doc_url) is six.text_type:
+                doc_url = six.ensure_str(
+                    unicodedata.normalize("NFKD", doc_url), "ascii", "ignore"
                 )
             return doc_url
 
