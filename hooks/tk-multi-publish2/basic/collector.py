@@ -1,11 +1,11 @@
 ﻿# Copyright (c) 2017 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
@@ -53,10 +53,10 @@ class MotionBuilderSessionCollector(HookBaseClass):
                 "type": "template",
                 "default": None,
                 "description": "Template path for artist work files. Should "
-                               "correspond to a template defined in "
-                               "templates.yml. If configured, is made available"
-                               "to publish plugins via the collected item's "
-                               "properties. ",
+                "correspond to a template defined in "
+                "templates.yml. If configured, is made available"
+                "to publish plugins via the collected item's "
+                "properties. ",
             },
         }
 
@@ -98,17 +98,12 @@ class MotionBuilderSessionCollector(HookBaseClass):
 
         # create the session item for the publish hierarchy
         session_item = parent_item.create_item(
-            "motionbuilder.fbx",
-            "Motion Builder FBX",
-            display_name
+            "motionbuilder.fbx", "Motion Builder FBX", display_name
         )
 
         # get the icon path to display for this item
         icon_path = os.path.join(
-            self.disk_location,
-            os.pardir,
-            "icons",
-            "motionbuilder.png"
+            self.disk_location, os.pardir, "icons", "motionbuilder.png"
         )
         session_item.set_icon_from_path(icon_path)
 
@@ -123,7 +118,8 @@ class MotionBuilderSessionCollector(HookBaseClass):
         if work_template_setting:
 
             work_template = publisher.engine.get_template_by_name(
-                work_template_setting.value)
+                work_template_setting.value
+            )
 
             # store the template on the item for use by publish plugins. we
             # can't evaluate the fields here because there's no guarantee the
@@ -136,4 +132,3 @@ class MotionBuilderSessionCollector(HookBaseClass):
         self.logger.info("Collected current Motion Builder scene")
 
         return session_item
-
