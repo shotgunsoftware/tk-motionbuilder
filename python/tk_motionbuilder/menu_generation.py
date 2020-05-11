@@ -218,7 +218,7 @@ class MenuGenerator(object):
                     cmd.add_command_to_menu(app_menu, self.__next_menu_index())
                     self._add_event_callback(cmd.name, cmd.callback)
                 app_menu.OnMenuActivate.Add(self.__menu_event)
-                app_name = self.__strip_unicode(app_name)
+                app_name = six.ensure_str(app_name)
                 menu.InsertLast(app_name, self.__next_menu_index(), app_menu)
             else:
                 # this app only has a single entry.
@@ -257,14 +257,6 @@ class MenuGenerator(object):
 
             QtCore.QTimer.singleShot(100, callback)
 
-    def __strip_unicode(self, val):
-        """
-        Get rid of unicode
-        """
-        if type(val) is six.text_type:
-            val = six.ensure_str(unicodedata.normalize("NFKD", val), "ascii", "ignore")
-        return val
-
 
 class AppCommand(object):
     """
@@ -276,14 +268,7 @@ class AppCommand(object):
         self.properties = command_dict["properties"]
         self.callback = command_dict["callback"]
         self.favourite = False
-
-        # deal with mobu's inability to handle unicode. #fail
-        if type(name) is six.text_type:
-            self.name = six.ensure_str(
-                unicodedata.normalize("NFKD", name), "ascii", "ignore"
-            )
-        else:
-            self.name = name
+        self.name = six.ensure_str(name)
 
     def get_app_name(self):
         """
@@ -317,13 +302,7 @@ class AppCommand(object):
         """
         if "app" in self.properties:
             app = self.properties["app"]
-            doc_url = app.documentation_url
-            # deal with nuke's inability to handle unicode. #fail
-            if type(doc_url) is six.text_type:
-                doc_url = six.ensure_str(
-                    unicodedata.normalize("NFKD", doc_url), "ascii", "ignore"
-                )
-            return doc_url
+            return six.ensure_str(app.documentation_url)
 
         return None
 
