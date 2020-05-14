@@ -190,7 +190,7 @@ class MenuGenerator(object):
             # run the app
             if sgtk.util.is_linux():
                 cmd = 'xdg-open "%s"' % disk_location
-            elif sgtk.util.is_windows()():
+            elif sgtk.util.is_windows():
                 cmd = 'cmd.exe /C start "Folder" "%s"' % disk_location
             elif sgtk.util.is_macos():
                 cmd = 'open "%s"' % disk_location
