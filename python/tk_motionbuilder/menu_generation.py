@@ -9,7 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 """
-Menu handling for Nuke
+Menu handling for Motionbuilder
 
 """
 import os
@@ -17,6 +17,7 @@ import sys
 import sgtk
 import webbrowser
 import unicodedata
+from tank_vendor import six
 
 from pyfbsdk import FBSystem
 from pyfbsdk import FBMenuManager
@@ -27,7 +28,7 @@ logger = sgtk.platform.get_logger(__name__)
 
 class MenuGenerator(object):
     """
-    Menu generation functionality for Nuke
+    Menu generation functionality for Motionbuilder
     """
 
     def __init__(self, engine, menu_name):
@@ -186,18 +187,15 @@ class MenuGenerator(object):
         paths = self._engine.context.filesystem_locations
         for disk_location in paths:
 
-            # get the setting
-            system = sys.platform
-
             # run the app
-            if system == "linux2":
+            if sgtk.util.is_linux():
                 cmd = 'xdg-open "%s"' % disk_location
-            elif system == "darwin":
-                cmd = 'open "%s"' % disk_location
-            elif system == "win32":
+            elif sgtk.util.is_windows():
                 cmd = 'cmd.exe /C start "Folder" "%s"' % disk_location
+            elif sgtk.util.is_macos():
+                cmd = 'open "%s"' % disk_location
             else:
-                raise Exception("Platform '%s' is not supported." % system)
+                raise Exception("Platform '%s' is not supported." % sys.platform)
 
             exit_code = os.system(cmd)
             if exit_code != 0:
@@ -220,7 +218,7 @@ class MenuGenerator(object):
                     cmd.add_command_to_menu(app_menu, self.__next_menu_index())
                     self._add_event_callback(cmd.name, cmd.callback)
                 app_menu.OnMenuActivate.Add(self.__menu_event)
-                app_name = self.__strip_unicode(app_name)
+                app_name = six.ensure_str(app_name)
                 menu.InsertLast(app_name, self.__next_menu_index(), app_menu)
             else:
                 # this app only has a single entry.
@@ -259,14 +257,6 @@ class MenuGenerator(object):
 
             QtCore.QTimer.singleShot(100, callback)
 
-    def __strip_unicode(self, val):
-        """
-        Get rid of unicode
-        """
-        if val.__class__ == unicode:
-            val = unicodedata.normalize("NFKD", val).encode("ascii", "ignore")
-        return val
-
 
 class AppCommand(object):
     """
@@ -278,12 +268,7 @@ class AppCommand(object):
         self.properties = command_dict["properties"]
         self.callback = command_dict["callback"]
         self.favourite = False
-
-        # deal with mobu's inability to handle unicode. #fail
-        if name.__class__ == unicode:
-            self.name = unicodedata.normalize("NFKD", name).encode("ascii", "ignore")
-        else:
-            self.name = name
+        self.name = six.ensure_str(name)
 
     def get_app_name(self):
         """
@@ -317,13 +302,7 @@ class AppCommand(object):
         """
         if "app" in self.properties:
             app = self.properties["app"]
-            doc_url = app.documentation_url
-            # deal with nuke's inability to handle unicode. #fail
-            if doc_url.__class__ == unicode:
-                doc_url = unicodedata.normalize("NFKD", doc_url).encode(
-                    "ascii", "ignore"
-                )
-            return doc_url
+            return six.ensure_str(app.documentation_url)
 
         return None
 

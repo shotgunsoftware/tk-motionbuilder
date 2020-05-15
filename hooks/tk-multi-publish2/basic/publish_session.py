@@ -11,6 +11,7 @@
 import os
 import sgtk
 from sgtk.util.filesystem import ensure_folder_exists
+from tank_vendor import six
 
 from pyfbsdk import FBApplication, FBFilePopup, FBFilePopupStyle
 
@@ -337,8 +338,7 @@ def _session_path():
     :return:
     """
     path = mb_app.FBXFileName
-    if isinstance(path, unicode):
-        path = path.encode("utf-8")
+    path = six.ensure_str(path)
 
     return path
 
