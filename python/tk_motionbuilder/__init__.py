@@ -64,7 +64,7 @@ def __create_sgtk_error_menu():
     (exc_type, exc_value, exc_traceback) = sys.exc_info()
     message = ""
     message += "Message: There was a problem starting the Engine.\n"
-    message += "Please contact support@shotgunsoftware.com\n\n"
+    message += "Please contact %s\n\n" % sgtk.support_url
     message += "Exception: %s - %s\n" % (exc_type, exc_value)
     message += "Traceback (most recent call last):\n"
     message += "\n".join(traceback.format_tb(exc_traceback))
