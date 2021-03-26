@@ -204,9 +204,9 @@ class MotionBuilderEngine(sgtk.platform.Engine):
         # where "basename" is the leaf part of the logging record name,
         # for example "tk-multi-shotgunpanel" or "qt_importer".
         if record.levelno < logging.INFO:
-            formatter = logging.Formatter("Debug: Shotgun %(basename)s: %(message)s")
+            formatter = logging.Formatter("Debug: SG %(basename)s: %(message)s")
         else:
-            formatter = logging.Formatter("Shotgun %(basename)s: %(message)s")
+            formatter = logging.Formatter("SG %(basename)s: %(message)s")
 
         msg = formatter.format(record)
 
@@ -214,4 +214,4 @@ class MotionBuilderEngine(sgtk.platform.Engine):
             print(msg)
         else:
             # for errors, pop up a modal msgbox
-            FBMessageBox("Shotgun Error", str(msg), "OK")
+            FBMessageBox("SG Error", str(msg), "OK")
