@@ -30,13 +30,13 @@ def __show_sgtk_disabled_message(details):
     Message when user clicks the shotgun is disabled menu
     """
     msg = (
-        "Shotgun integration is currently disabled because the file you "
-        "have opened is not recognized - Shotgun cannot "
+        "SG integration is currently disabled because the file you "
+        "have opened is not recognized - SG cannot "
         "determine which Context the currently open file belongs to. "
-        "In order to enable the Shotgun functionality, try opening another "
+        "In order to enable the SG functionality, try opening another "
         "file. <br><br><i>Details:</i> %s" % details
     )
-    FBMessageBox("Shotgun Error", msg, "OK")
+    FBMessageBox("SG Error", msg, "OK")
 
 
 def __create_sgtk_disabled_menu(details):
@@ -74,10 +74,10 @@ def __create_sgtk_error_menu():
     if not menu:
         menu_mgr.InsertBefore(None, "Help", "Shotgun")
         menu = menu_mgr.GetMenu("Shotgun")
-    menu.InsertLast("[Shotgun Error - Click for details]", 1)
+    menu.InsertLast("[SG Error - Click for details]", 1)
 
     def menu_event(control, event):
-        FBMessageBox("Shotgun Error", message, "OK")
+        FBMessageBox("SG Error", message, "OK")
 
     menu.OnMenuActivate.Add(menu_event)
 
