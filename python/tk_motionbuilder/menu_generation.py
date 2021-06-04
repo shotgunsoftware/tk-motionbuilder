@@ -154,8 +154,8 @@ class MenuGenerator(object):
         # create the menu object
         ctx_menu = FBGenericMenu()
 
-        ctx_menu.InsertLast("Jump to Shotgun", self.__next_menu_index())
-        self._add_event_callback("Jump to Shotgun", self._jump_to_sg)
+        ctx_menu.InsertLast("Jump to ShotGrid", self.__next_menu_index())
+        self._add_event_callback("Jump to ShotGrid", self._jump_to_sg)
 
         ctx_menu.InsertLast("Jump to File System", self.__next_menu_index())
         self._add_event_callback("Jump to File System", self._jump_to_fs)
