@@ -32,8 +32,8 @@ configuration:
 requires_shotgun_fields:
 
 # More verbose description of this item
-display_name: "Shotgun Engine for Motionbuilder"
-description: "Shotgun Integration in Motionbuilder"
+display_name: "ShotGrid Engine for Motionbuilder"
+description: "ShotGrid Integration in Motionbuilder"
 
 # Required minimum versions for this item to run
 requires_shotgun_version:

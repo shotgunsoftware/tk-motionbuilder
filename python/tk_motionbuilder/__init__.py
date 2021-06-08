@@ -44,10 +44,10 @@ def __create_sgtk_disabled_menu(details):
     Creates a std "disabled" Shotgun menu
     """
     menu_mgr = FBMenuManager()
-    menu = menu_mgr.GetMenu("Shotgun")
+    menu = menu_mgr.GetMenu("ShotGrid")
     if not menu:
-        menu_mgr.InsertBefore(None, "Help", "Shotgun")
-        menu = menu_mgr.GetMenu("Shotgun")
+        menu_mgr.InsertBefore(None, "Help", "ShotGrid")
+        menu = menu_mgr.GetMenu("ShotGrid")
     menu.InsertLast("Sgtk is disabled.", 1)
 
     def menu_event(control, event):
@@ -70,10 +70,10 @@ def __create_sgtk_error_menu():
     message += "\n".join(traceback.format_tb(exc_traceback))
 
     menu_mgr = FBMenuManager()
-    menu = menu_mgr.GetMenu("Shotgun")
+    menu = menu_mgr.GetMenu("ShotGrid")
     if not menu:
-        menu_mgr.InsertBefore(None, "Help", "Shotgun")
-        menu = menu_mgr.GetMenu("Shotgun")
+        menu_mgr.InsertBefore(None, "Help", "ShotGrid")
+        menu = menu_mgr.GetMenu("ShotGrid")
     menu.InsertLast("[SG Error - Click for details]", 1)
 
     def menu_event(control, event):

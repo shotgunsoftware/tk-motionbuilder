@@ -186,7 +186,7 @@ class MotionBuilderEngine(sgtk.platform.Engine):
         to reflect currently loaded apps.
         """
         tk_motionbuilder = self.import_module("tk_motionbuilder")
-        self._menu_generator = tk_motionbuilder.MenuGenerator(self, "Shotgun")
+        self._menu_generator = tk_motionbuilder.MenuGenerator(self, "ShotGrid")
         self._menu_generator.create_menu()
 
     def _emit_log_message(self, handler, record):
