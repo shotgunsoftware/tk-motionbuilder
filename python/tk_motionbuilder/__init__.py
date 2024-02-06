@@ -30,13 +30,13 @@ def __show_sgtk_disabled_message(details):
     Message when user clicks the shotgun is disabled menu
     """
     msg = (
-        "SG integration is currently disabled because the file you "
-        "have opened is not recognized - SG cannot "
+        "PTR integration is currently disabled because the file you "
+        "have opened is not recognized - PTR cannot "
         "determine which Context the currently open file belongs to. "
-        "In order to enable the SG functionality, try opening another "
+        "In order to enable the PTR functionality, try opening another "
         "file. <br><br><i>Details:</i> %s" % details
     )
-    FBMessageBox("SG Error", msg, "OK")
+    FBMessageBox("PTR Error", msg, "OK")
 
 
 def __create_sgtk_disabled_menu(details):
@@ -44,10 +44,10 @@ def __create_sgtk_disabled_menu(details):
     Creates a std "disabled" Shotgun menu
     """
     menu_mgr = FBMenuManager()
-    menu = menu_mgr.GetMenu("ShotGrid")
+    menu = menu_mgr.GetMenu("Flow Production Tracking")
     if not menu:
-        menu_mgr.InsertBefore(None, "Help", "ShotGrid")
-        menu = menu_mgr.GetMenu("ShotGrid")
+        menu_mgr.InsertBefore(None, "Help", "Flow Production Tracking")
+        menu = menu_mgr.GetMenu("Flow Production Tracking")
     menu.InsertLast("Sgtk is disabled.", 1)
 
     def menu_event(control, event):
@@ -70,14 +70,14 @@ def __create_sgtk_error_menu():
     message += "\n".join(traceback.format_tb(exc_traceback))
 
     menu_mgr = FBMenuManager()
-    menu = menu_mgr.GetMenu("ShotGrid")
+    menu = menu_mgr.GetMenu("Flow Production Tracking")
     if not menu:
-        menu_mgr.InsertBefore(None, "Help", "ShotGrid")
-        menu = menu_mgr.GetMenu("ShotGrid")
-    menu.InsertLast("[SG Error - Click for details]", 1)
+        menu_mgr.InsertBefore(None, "Help", "Flow Production Tracking")
+        menu = menu_mgr.GetMenu("Flow Production Tracking")
+    menu.InsertLast("[PTR Error - Click for details]", 1)
 
     def menu_event(control, event):
-        FBMessageBox("SG Error", message, "OK")
+        FBMessageBox("PTR Error", message, "OK")
 
     menu.OnMenuActivate.Add(menu_event)
 
