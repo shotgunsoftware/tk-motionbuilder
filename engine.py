@@ -186,7 +186,9 @@ class MotionBuilderEngine(sgtk.platform.Engine):
         to reflect currently loaded apps.
         """
         tk_motionbuilder = self.import_module("tk_motionbuilder")
-        self._menu_generator = tk_motionbuilder.MenuGenerator(self, "ShotGrid")
+        self._menu_generator = tk_motionbuilder.MenuGenerator(
+            self, "Flow Production Tracking"
+        )
         self._menu_generator.create_menu()
 
     def _emit_log_message(self, handler, record):
@@ -204,9 +206,9 @@ class MotionBuilderEngine(sgtk.platform.Engine):
         # where "basename" is the leaf part of the logging record name,
         # for example "tk-multi-shotgunpanel" or "qt_importer".
         if record.levelno < logging.INFO:
-            formatter = logging.Formatter("Debug: SG %(basename)s: %(message)s")
+            formatter = logging.Formatter("Debug: PTR %(basename)s: %(message)s")
         else:
-            formatter = logging.Formatter("SG %(basename)s: %(message)s")
+            formatter = logging.Formatter("PTR %(basename)s: %(message)s")
 
         msg = formatter.format(record)
 
@@ -214,4 +216,4 @@ class MotionBuilderEngine(sgtk.platform.Engine):
             print(msg)
         else:
             # for errors, pop up a modal msgbox
-            FBMessageBox("SG Error", str(msg), "OK")
+            FBMessageBox("PTR Error", str(msg), "OK")
