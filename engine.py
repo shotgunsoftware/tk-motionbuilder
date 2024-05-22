@@ -111,11 +111,6 @@ class MotionBuilderEngine(sgtk.platform.Engine):
         """
         Executes once all apps have been initialized
         """
-        MOTIONBUILDER_2018_VERSION = 18000.0
-        if FBSystem().Version < MOTIONBUILDER_2018_VERSION:
-            # older versions are missing image plugins, hotpatch them in.
-            self._add_qt470_image_format_plugins_to_library_path()
-
         self._initialize_menu()
 
     def post_context_change(self, old_context, new_context):
@@ -135,26 +130,6 @@ class MotionBuilderEngine(sgtk.platform.Engine):
         """
         self.logger.debug("%s: Destroying..." % self)
         self._menu_generator.destroy_menu()
-
-    def _add_qt470_image_format_plugins_to_library_path(self):
-        """
-        Explicitly add image format plugins for qt 4.70/vs2010 compile
-
-        This is to patch an issue on older versions of Mobu where
-        these plugins are missing from the version of PySide that is
-        shipped with the DCC.
-        """
-        from sgtk.platform.qt import QtCore
-
-        plugin_path = os.path.join(
-            self.disk_location, "resources", "qt470_win64_vs2010", "qt_plugins"
-        )
-
-        self.logger.debug(
-            "Adding support for various image formats via qplugins."
-            "Plugin path: %s" % (plugin_path,)
-        )
-        QtCore.QCoreApplication.addLibraryPath(plugin_path)
 
     def _get_dialog_parent(self):
         """
