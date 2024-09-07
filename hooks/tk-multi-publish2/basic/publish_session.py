@@ -11,9 +11,13 @@
 import os
 import sgtk
 from sgtk.util.filesystem import ensure_folder_exists
-from tank_vendor import six
 
 from pyfbsdk import FBApplication, FBFilePopup, FBFilePopupStyle
+
+try:
+    from tank_vendor import sgutils
+except ImportError:
+    from tank_vendor import six as sgutils
 
 mb_app = FBApplication()
 
@@ -338,7 +342,7 @@ def _session_path():
     :return:
     """
     path = mb_app.FBXFileName
-    path = six.ensure_str(path)
+    path = sgutils.ensure_str(path)
 
     return path
 
