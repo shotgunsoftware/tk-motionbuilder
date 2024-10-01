@@ -111,6 +111,8 @@ class MotionBuilderEngine(sgtk.platform.Engine):
         """
         Executes once all apps have been initialized
         """
+        # Initialie the SG Toolkit style to the application.
+        self._initialize_dark_look_and_feel()
         self._initialize_menu()
 
     def post_context_change(self, old_context, new_context):
@@ -130,6 +132,30 @@ class MotionBuilderEngine(sgtk.platform.Engine):
         """
         self.logger.debug("%s: Destroying..." % self)
         self._menu_generator.destroy_menu()
+
+    def _initialize_dark_look_and_feel(self):
+        """
+        Override the base engine method.
+        Apply specific styling for Mobu.
+        """
+
+        from sgtk.platform.qt import QtGui
+
+        # Initialize the SG Toolkit style to the application.
+        super()._initialize_dark_look_and_feel()
+
+        # Apply Mobu specific styling
+        app = QtGui.QApplication.instance()
+        app_palette = app.palette()
+        # The default placeholder text for Mobu is black, let's set it back to
+        # the text color (as it was in Qt5), but with the current placeholder
+        # text alpha value.
+        new_placeholder_text_color = app_palette.text().color()
+        placeholder_text_color = app_palette.placeholderText().color()
+        new_placeholder_text_color.setAlpha(placeholder_text_color.alpha())
+        app_palette.setColor(QtGui.QPalette.PlaceholderText, new_placeholder_text_color)
+        # Set the palette back with the Mobu specific styling
+        app.setPalette(app_palette)
 
     def _get_dialog_parent(self):
         """
