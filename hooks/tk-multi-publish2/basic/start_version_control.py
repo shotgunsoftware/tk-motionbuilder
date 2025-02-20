@@ -275,10 +275,8 @@ def _session_path():
     Return the path to the current session
     :return:
     """
-    path = mb_app.FBXFileName
-    path = str(path)
 
-    return path
+    return str(mb_app.FBXFileName)
 
 
 def _save_session(path):
