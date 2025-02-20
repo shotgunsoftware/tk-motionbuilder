@@ -14,11 +14,6 @@ from sgtk.util.filesystem import ensure_folder_exists
 
 from pyfbsdk import FBApplication, FBFilePopup, FBFilePopupStyle
 
-try:
-    from tank_vendor import sgutils
-except ImportError:
-    from tank_vendor import six as sgutils
-
 mb_app = FBApplication()
 
 HookBaseClass = sgtk.get_hook_baseclass()
@@ -115,7 +110,7 @@ class MotionBuilderSessionPublishPlugin(HookBaseClass):
         """
 
         # inherit the settings from the base publish plugin
-        base_settings = super(MotionBuilderSessionPublishPlugin, self).settings or {}
+        base_settings = super().settings or {}
 
         # settings specific to this class
         mobu_publish_settings = {
@@ -293,7 +288,7 @@ class MotionBuilderSessionPublishPlugin(HookBaseClass):
         item.properties["path"] = path
 
         # run the base class validation
-        return super(MotionBuilderSessionPublishPlugin, self).validate(settings, item)
+        return super().validate(settings, item)
 
     def publish(self, settings, item):
         """
@@ -316,7 +311,7 @@ class MotionBuilderSessionPublishPlugin(HookBaseClass):
         item.properties["path"] = path
 
         # let the base class register the publish
-        super(MotionBuilderSessionPublishPlugin, self).publish(settings, item)
+        super().publish(settings, item)
 
     def finalize(self, settings, item):
         """
@@ -330,7 +325,7 @@ class MotionBuilderSessionPublishPlugin(HookBaseClass):
         """
 
         # do the base class finalization
-        super(MotionBuilderSessionPublishPlugin, self).finalize(settings, item)
+        super().finalize(settings, item)
 
         # bump the session file to the next version
         self._save_to_next_version(item.properties["path"], item, _save_session)
@@ -342,7 +337,7 @@ def _session_path():
     :return:
     """
     path = mb_app.FBXFileName
-    path = sgutils.ensure_str(path)
+    path = str(path)
 
     return path
 
