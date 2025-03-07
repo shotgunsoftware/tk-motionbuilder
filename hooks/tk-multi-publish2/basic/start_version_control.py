@@ -13,11 +13,6 @@ import sgtk
 
 from pyfbsdk import FBApplication, FBFilePopup, FBFilePopupStyle
 
-try:
-    from tank_vendor import sgutils
-except ImportError:
-    from tank_vendor import six as sgutils
-
 mb_app = FBApplication()
 
 HookBaseClass = sgtk.get_hook_baseclass()
@@ -280,10 +275,8 @@ def _session_path():
     Return the path to the current session
     :return:
     """
-    path = mb_app.FBXFileName
-    path = sgutils.ensure_str(path)
 
-    return path
+    return str(mb_app.FBXFileName)
 
 
 def _save_session(path):

@@ -45,7 +45,7 @@ class MotionBuilderSessionCollector(HookBaseClass):
         """
 
         # grab any base class settings
-        collector_settings = super(MotionBuilderSessionCollector, self).settings or {}
+        collector_settings = super().settings or {}
 
         # settings specific to this collector
         motionbuilder_session_settings = {
