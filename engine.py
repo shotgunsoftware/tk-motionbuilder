@@ -118,14 +118,20 @@ class MotionBuilderEngine(sgtk.platform.Engine):
     def init_engine(self):
         self.logger.debug("%s: Initializing..." % self)
 
+        if self.context.project is None:
+            # must have at least a project in the context to even start!
+            raise sgtk.TankError(
+                "The Motionbuilder engine needs at least a project in the context "
+                "in order to start! Your context: %s" % self.context
+            )
+
+        # motionbuilder doesn't have good exception handling, so install our own trap
+        sys.excepthook = sgtk_mobu_exception_trap
+
+    def pre_app_init(self):
+        from sgtk.platform.qt import QtGui
 
         url_doc_supported_versions = "https://help.autodesk.com/view/SGDEV/ENU/?guid=SGD_si_integrations_engine_supported_versions_html"
-
-        # Unable to use sgtk.platform.qt from here because it has not been
-        # provisionned by tk-core yet
-        from sgtk.util.qt_importer import QtImporter
-
-        qt = QtImporter()
 
         if self.version_year < VERSION_OLDEST_COMPATIBLE:
             # Old incompatible version
@@ -139,7 +145,7 @@ For information regarding support engine versions, please visit this page:
 
             if self.has_ui:
                 try:
-                    qt.QtGui.QMessageBox.critical(
+                    QtGui.QMessageBox.critical(
                         None,  # parent
                         "Error - Flow Production Tracking Compatibility!".ljust(
                             # Padding to try to prevent the dialog being insanely narrow
@@ -163,13 +169,16 @@ For information regarding support engine versions, please visit this page:
                     # But there is nothing more we can do here.
                     pass
 
-            raise sgtk.TankError(
+            err = sgtk.TankError(
                 message.format(
                     product="MotionBuilder",
                     url_doc_supported_versions=url_doc_supported_versions,
                     version=VERSION_OLDEST_COMPATIBLE,
                 )
             )
+
+            err._tank_error_raised_already = True
+            raise err
 
         elif self.version_year < VERSION_OLDEST_SUPPORTED:
             # Older than the oldest supported version
@@ -182,7 +191,7 @@ For information regarding support engine versions, please visit this page:
             )
 
             if self.has_ui:
-                qt.QtGui.QMessageBox.warning(
+                QtGui.QMessageBox.warning(
                     None,  # parent
                     "Warning - Flow Production Tracking Compatibility!".ljust(
                         # Padding to try to prevent the dialog being insanely narrow
@@ -226,7 +235,7 @@ For information regarding support engine versions, please visit this page:
             if self.has_ui and self.version_year >= self.get_setting(
                 "compatibility_dialog_min_version"
             ):
-                qt.QtGui.QMessageBox.warning(
+                QtGui.QMessageBox.warning(
                     None,  # parent
                     "Warning - Flow Production Tracking Compatibility!".ljust(
                         # Padding to try to prevent the dialog being insanely narrow
@@ -253,16 +262,6 @@ Please report any issues to:
                         version=self.version_year,
                     ),
                 )
-
-        if self.context.project is None:
-            # must have at least a project in the context to even start!
-            raise sgtk.TankError(
-                "The Motionbuilder engine needs at least a project in the context "
-                "in order to start! Your context: %s" % self.context
-            )
-
-        # motionbuilder doesn't have good exception handling, so install our own trap
-        sys.excepthook = sgtk_mobu_exception_trap
 
     def post_app_init(self):
         """
