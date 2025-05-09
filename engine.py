@@ -13,14 +13,20 @@ A MotionBuilder engine for Shotgun.
 
 """
 
-import os
-import sys
-import sgtk
 import logging
+import math
+import sys
 
 # application libs
-from pyfbsdk import FBMessageBox
-from pyfbsdk import FBSystem
+import pyfbsdk
+import sgtk
+
+# MotionBuilder versions compatibility constants
+VERSION_OLDEST_COMPATIBLE = 2022
+VERSION_OLDEST_SUPPORTED = 2023
+VERSION_NEWEST_SUPPORTED = 2026
+# Caution: make sure compatibility_dialog_min_version default value in info.yml
+# is equal to VERSION_NEWEST_SUPPORTED
 
 
 # custom exception handler for motion builder
@@ -55,6 +61,22 @@ def sgtk_mobu_exception_trap(ex_cls, ex, tb):
 
 
 class MotionBuilderEngine(sgtk.platform.Engine):
+    _version_year = None
+
+    @property
+    def version_year(self):
+        if self._version_year is None:
+            version = pyfbsdk.FBSystem().Version
+            try:
+                assert isinstance(version, float)
+                assert version # Not 0
+                self._version_year = 2000 + math.ceil(version / 1000)
+            except (AssertionError, IndexError):
+                self.log_debug("Unable to extract Motion Builder version", exc_info=True)
+                self._version_year = 0
+
+        return self._version_year
+
     @property
     def host_info(self):
         """
@@ -79,7 +101,7 @@ class MotionBuilderEngine(sgtk.platform.Engine):
         try:
             # NOTE: The 'Version' returns a double value
             # we really need the conversion to string.
-            host_info["version"] = str(FBSystem().Version)
+            host_info["version"] = str(pyfbsdk.FBSystem().Version)
         except:
             # Fallback to initialized values above
             pass
@@ -105,6 +127,141 @@ class MotionBuilderEngine(sgtk.platform.Engine):
 
         # motionbuilder doesn't have good exception handling, so install our own trap
         sys.excepthook = sgtk_mobu_exception_trap
+
+
+    def pre_app_init(self):
+        from sgtk.platform.qt import QtCore, QtGui
+
+        self.log_debug("%s: Initializing..." % self)
+
+        url_doc_supported_versions = "https://help.autodesk.com/view/SGDEV/ENU/?guid=SGD_si_integrations_engine_supported_versions_html"
+
+        if self.version_year < VERSION_OLDEST_COMPATIBLE:
+            # Old incompatible version
+            message = """
+Flow Production Tracking is no longer compatible with {product} versions older
+than {version}.
+
+For information regarding support engine versions, please visit this page:
+{url_doc_supported_versions}
+            """.strip()
+
+            if self.has_ui:
+                try:
+                    QtGui.QMessageBox.critical(
+                        None,  # parent
+                        "Error - Flow Production Tracking Compatibility!".ljust(
+                            # Padding to try to prevent the dialog being insanely narrow
+                            70
+                        ),
+                        message.replace(
+                            # Precense of \n breaks the Rich Text Format
+                            "\n",
+                            "<br>",
+                        ).format(
+                            product="MotionBuilder",
+                            url_doc_supported_versions='<a href="{u}">{u}</a>'.format(
+                                u=url_doc_supported_versions,
+                            ),
+                            version=VERSION_OLDEST_COMPATIBLE,
+                        ),
+                    )
+                except:
+                    # It is unlikely that the above message will go through
+                    # on old versions of MoBu (Python2, Qt4, ...).
+                    # But there is nothing more we can do here.
+                    pass
+
+            raise sgtk.TankError(
+                message.format(
+                    product="MotionBuilder",
+                    url_doc_supported_versions=url_doc_supported_versions,
+                    version=VERSION_OLDEST_COMPATIBLE,
+                )
+            )
+
+        elif self.version_year < VERSION_OLDEST_SUPPORTED:
+            # Older than the oldest supported version
+            self.logger.warning(
+                "Flow Production Tracking no longer supports {product} "
+                "versions older than {version}".format(
+                    product="MotionBuilder",
+                    version=VERSION_OLDEST_SUPPORTED,
+                )
+            )
+
+            if self.has_ui:
+                QtGui.QMessageBox.warning(
+                    None,  # parent
+                    "Warning - Flow Production Tracking Compatibility!".ljust(
+                        # Padding to try to prevent the dialog being insanely narrow
+                        70
+                    ),
+                    """
+Flow Production Tracking no longer supports {product} versions older than
+{version}.
+You can continue to use Toolkit but you may experience bugs or instabilities.
+
+For information regarding support engine versions, please visit this page:
+{url_doc_supported_versions}
+                    """.strip()
+                    .replace(
+                        # Precense of \n breaks the Rich Text Format
+                        "\n",
+                        "<br>",
+                    )
+                    .format(
+                        product="MotionBuilder",
+                        url_doc_supported_versions='<a href="{u}">{u}</a>'.format(
+                            u=url_doc_supported_versions,
+                        ),
+                        version=VERSION_OLDEST_SUPPORTED,
+                    ),
+                )
+
+        elif self.version_year < VERSION_NEWEST_SUPPORTED:
+            # Within the range of supported versions
+            self.logger.debug(f"Running MotionBuilder version {self.version_year}")
+        else:
+            # Newer than the newest supported version: untested
+            self.logger.warning(
+                "Flow Production Tracking has not yet been fully tested with "
+                "{product} version {version}.".format(
+                    product="MotionBuilder",
+                    version=self.version_year,
+                )
+            )
+
+            if self.has_ui and self.version_year >= self.get_setting(
+                "compatibility_dialog_min_version"
+            ):
+                QtGui.QMessageBox.warning(
+                    None,  # parent
+                    "Warning - Flow Production Tracking Compatibility!".ljust(
+                        # Padding to try to prevent the dialog being insanely narrow
+                        70
+                    ),
+                    """
+Flow Production Tracking has not yet been fully tested with {product} version
+{version}.
+You can continue to use Toolkit but you may experience bugs or instabilities.
+
+Please report any issues to:
+{support_url}
+                    """.strip()
+                    .replace(
+                        # Precense of \n breaks the Rich Text Format
+                        "\n",
+                        "<br>",
+                    )
+                    .format(
+                        product="MotionBuilder",
+                        support_url='<a href="{u}">{u}</a>'.format(
+                            u=sgtk.support_url,
+                        ),
+                        version=self.version_year,
+                    ),
+                )
 
     def post_app_init(self):
         """
@@ -216,4 +373,4 @@ class MotionBuilderEngine(sgtk.platform.Engine):
             print(msg)
         else:
             # for errors, pop up a modal msgbox
-            FBMessageBox("PTR Error", str(msg), "OK")
+            pyfbsdk.FBMessageBox("PTR Error", str(msg), "OK")
