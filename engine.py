@@ -69,10 +69,12 @@ class MotionBuilderEngine(sgtk.platform.Engine):
             version = pyfbsdk.FBSystem().Version
             try:
                 assert isinstance(version, float)
-                assert version # Not 0
+                assert version  # Not 0
                 self._version_year = 2000 + math.ceil(version / 1000)
             except (AssertionError, IndexError):
-                self.log_debug("Unable to extract Motion Builder version", exc_info=True)
+                self.log_debug(
+                    "Unable to extract Motion Builder version", exc_info=True
+                )
                 self._version_year = 0
 
         return self._version_year
