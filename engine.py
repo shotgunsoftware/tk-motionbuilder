@@ -146,6 +146,8 @@ For information regarding support engine versions, please visit this page:
             if self.has_ui:
                 try:
                     QtGui.QMessageBox.critical(
+                        # Not using pyfbsdk.FBMessageBox because does not raise
+                        # different severity of message
                         None,  # parent
                         "Error - Flow Production Tracking Compatibility!".ljust(
                             # Padding to try to prevent the dialog being insanely narrow
@@ -192,6 +194,8 @@ For information regarding support engine versions, please visit this page:
 
             if self.has_ui:
                 QtGui.QMessageBox.warning(
+                    # Not using pyfbsdk.FBMessageBox because does not raise
+                    # different severity of message
                     None,  # parent
                     "Warning - Flow Production Tracking Compatibility!".ljust(
                         # Padding to try to prevent the dialog being insanely narrow
@@ -236,6 +240,8 @@ For information regarding support engine versions, please visit this page:
                 "compatibility_dialog_min_version"
             ):
                 QtGui.QMessageBox.warning(
+                    # Not using pyfbsdk.FBMessageBox because does not raise
+                    # different severity of message
                     None,  # parent
                     "Warning - Flow Production Tracking Compatibility!".ljust(
                         # Padding to try to prevent the dialog being insanely narrow
