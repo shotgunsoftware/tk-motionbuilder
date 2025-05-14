@@ -161,13 +161,17 @@ For information regarding support engine versions, please visit this page:
                             "<br>",
                         ).format(
                             product="MotionBuilder",
-                            url_doc_supported_versions='<a href="{u}">{u}</a>'.format(
+                            url_doc_supported_versions='<a style="color: {color}" href="{u}">{u}</a>'.format(
                                 u=url_doc_supported_versions,
+                                color=sgtk.platform.constants.SG_STYLESHEET_CONSTANTS.get(
+                                    "SG_HIGHLIGHT_COLOR",
+                                    "#18A7E3",
+                                ),
                             ),
                             version=VERSION_OLDEST_COMPATIBLE,
                         ),
                     )
-                except:
+                except:  # nosec B110
                     # It is unlikely that the above message will go through
                     # on old versions of MoBu (Python2, Qt4, ...).
                     # But there is nothing more we can do here.
@@ -218,8 +222,12 @@ For information regarding support engine versions, please visit this page:
                     )
                     .format(
                         product="MotionBuilder",
-                        url_doc_supported_versions='<a href="{u}">{u}</a>'.format(
+                        url_doc_supported_versions='<a style="color: {color}" href="{u}">{u}</a>'.format(
                             u=url_doc_supported_versions,
+                            color=sgtk.platform.constants.SG_STYLESHEET_CONSTANTS.get(
+                                "SG_HIGHLIGHT_COLOR",
+                                "#18A7E3",
+                            ),
                         ),
                         version=VERSION_OLDEST_SUPPORTED,
                     ),
@@ -264,8 +272,12 @@ Please report any issues to:
                     )
                     .format(
                         product="MotionBuilder",
-                        support_url='<a href="{u}">{u}</a>'.format(
+                        support_url='<a style="color: {color}" href="{u}">{u}</a>'.format(
                             u=sgtk.support_url,
+                            color=sgtk.platform.constants.SG_STYLESHEET_CONSTANTS.get(
+                                "SG_HIGHLIGHT_COLOR",
+                                "#18A7E3",
+                            ),
                         ),
                         version=self.version_year,
                     ),
