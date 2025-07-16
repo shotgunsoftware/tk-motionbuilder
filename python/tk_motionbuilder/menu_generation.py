@@ -22,11 +22,6 @@ from pyfbsdk import FBSystem
 from pyfbsdk import FBMenuManager
 from pyfbsdk import FBGenericMenu
 
-try:
-    from tank_vendor import sgutils
-except ImportError:
-    from tank_vendor import six as sgutils
-
 logger = sgtk.platform.get_logger(__name__)
 
 
@@ -224,7 +219,6 @@ class MenuGenerator(object):
                     cmd.add_command_to_menu(app_menu, self.__next_menu_index())
                     self._add_event_callback(cmd.name, cmd.callback)
                 app_menu.OnMenuActivate.Add(self.__menu_event)
-                app_name = sgutils.ensure_str(app_name)
                 menu.InsertLast(app_name, self.__next_menu_index(), app_menu)
             else:
                 # this app only has a single entry.
@@ -274,7 +268,7 @@ class AppCommand(object):
         self.properties = command_dict["properties"]
         self.callback = command_dict["callback"]
         self.favourite = False
-        self.name = sgutils.ensure_str(name)
+        self.name = name
 
     def get_app_name(self):
         """
@@ -308,7 +302,7 @@ class AppCommand(object):
         """
         if "app" in self.properties:
             app = self.properties["app"]
-            return sgutils.ensure_str(app.documentation_url)
+            return str(app.documentation_url)
 
         return None
 
