@@ -98,6 +98,7 @@ class MenuGenerator(object):
 
                     # add to the favourites section of the menu:
                     cmd.add_command_to_menu(favourites_menu, self.__next_menu_index())
+                    self._add_event_callback(cmd.name, cmd.callback)
 
                     # mark as a favourite item
                     cmd.favourite = True
