@@ -63,6 +63,11 @@ class MenuGenerator(object):
         # now add the context item on top of the main menu
         context_menu = self._add_context_menu(sg_menu)
 
+        # now enumerate all items and create menu objects for them
+        menu_items = []
+        for cmd_name, cmd_details in self._engine.commands.items():
+            menu_items.append(AppCommand(cmd_name, cmd_details))
+
         # add separator:
         sg_menu.InsertLast("", self.__next_menu_index())
 
@@ -73,8 +78,7 @@ class MenuGenerator(object):
             menu_name = fav["name"]
 
             # scan through all menu items
-            for cmd_name, cmd_details in self._engine.commands.items():
-                cmd = AppCommand(cmd_name, cmd_details)
+            for cmd in menu_items:
                 if (
                     cmd.get_app_instance_name() == app_instance_name
                     and cmd.name == menu_name
@@ -106,9 +110,7 @@ class MenuGenerator(object):
         # separate them out into various sections
         commands_by_app = {}
 
-        for cmd_name, cmd_details in self._engine.commands.items():
-            cmd = AppCommand(cmd_name, cmd_details)
-
+        for cmd in menu_items:
             if cmd.get_type() == "context_menu":
                 # context menu!
                 cmd.add_command_to_menu(context_menu, self.__next_menu_index())
