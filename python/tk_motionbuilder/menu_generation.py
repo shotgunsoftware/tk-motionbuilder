@@ -12,6 +12,7 @@
 Menu handling for Motionbuilder
 
 """
+
 import os
 import sys
 import sgtk

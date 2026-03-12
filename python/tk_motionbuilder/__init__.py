@@ -12,6 +12,7 @@
 Callbacks to manage the engine when a new file is loaded in shotgun.
 
 """
+
 import os
 import sys
 import traceback
@@ -61,7 +62,7 @@ def __create_sgtk_error_menu():
     Creates a std "error" shotgun menu and grabs the current context.
     Make sure that this is called from inside an except clause.
     """
-    (exc_type, exc_value, exc_traceback) = sys.exc_info()
+    exc_type, exc_value, exc_traceback = sys.exc_info()
     message = ""
     message += "Message: There was a problem starting the Engine.\n"
     message += "Please contact %s\n\n" % sgtk.support_url
