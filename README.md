@@ -1,8 +1,8 @@
 # Toolkit Engine for MotionBuilder
 
-![Supported MotionBuilder: 2023 - 2026](https://img.shields.io/badge/MotionBuilder-2026_|_2025_|_2024_|_2023-blue?logo=autodesk "Supported MotionBuilder versions")
-[![Supported VFX Platform: 2022 - 2025](https://img.shields.io/badge/VFX_Platform-2025_|_2024_|_2023_|_2022-blue)](http://www.vfxplatform.com/ "Supported VFX Platform")
-[![Supported Python versions: 3.9 - 3.11](https://img.shields.io/badge/Python-3.11_|_3.10_|_3.9-blue?logo=python&logoColor=f5f5f5)](https://www.python.org/ "Supported Python versions")
+![Supported MotionBuilder: 2024 - 2027](https://img.shields.io/badge/MotionBuilder-2027_|_2026_|_2025_|_2024-blue?logo=autodesk "Supported MotionBuilder versions")
+[![Supported VFX Platform: CY2022 - CY2026](https://img.shields.io/badge/VFX_Reference_Platform-CY2022_|_CY2023_|_CY2024_|_CY2025_|_CY2026-blue)](http://www.vfxplatform.com/ "Supported VFX Reference Platform versions")
+[![Supported Python versions: 3.9, 3.10, 3.11, 3.13](https://img.shields.io/badge/Python-3.9_|_3.10_|_3.11_|_3.13-blue?logo=python&logoColor=f5f5f5)](https://www.python.org/ "Supported Python versions")
 
 [![Build Status](https://dev.azure.com/shotgun-ecosystem/Toolkit/_apis/build/status/Engines/tk-motionbuilder?branchName=master)](https://dev.azure.com/shotgun-ecosystem/Toolkit/_build/latest?definitionId=79&branchName=master)
 [![Code style: black](https://img.shields.io/badge/Code%20style-black-000000.svg)](https://github.com/psf/black)
